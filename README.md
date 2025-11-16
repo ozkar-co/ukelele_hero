@@ -198,7 +198,7 @@ El archivo `src/utils/config.py` contiene la configuración personalizable:
 - **Buffer size**: 4096 samples
 - **Método de detección**: FFT + Peak detection + interpolación parabólica
 - **Tolerancia por defecto**: ±10 cents (configurable)
-- **Rango de frecuencia**: 200-600 Hz (optimizado para ukulele)
+- **Rango de frecuencia**: 130-1320 Hz (C3 a E6 - rango completo del ukulele)
 
 #### Rendimiento
 - **FPS objetivo**: 60 FPS

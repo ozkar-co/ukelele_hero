@@ -22,6 +22,7 @@ def frequency_to_note(frequency):
     # Calcular la distancia a cada nota conocida
     min_distance = float('inf')
     closest_note = None
+    deviation = 0
     
     for note, note_freq in NOTE_FREQUENCIES.items():
         # Calcular distancia en cents (100 cents = 1 semitono)
@@ -33,7 +34,11 @@ def frequency_to_note(frequency):
             closest_note = note
             deviation = distance_cents
     
-    return closest_note, deviation
+    # Solo devolver resultado si está dentro de un rango razonable (±50 cents)
+    if min_distance <= 50:
+        return closest_note, deviation
+    else:
+        return None, 0
 
 
 def is_note_in_tune(deviation_cents, tolerance=NOTE_TOLERANCE_CENTS):

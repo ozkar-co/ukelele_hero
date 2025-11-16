@@ -83,6 +83,37 @@ class TestHelpers(unittest.TestCase):
         note, deviation = frequency_to_note(435.0)
         self.assertEqual(note, 'A4')
         self.assertLess(deviation, -15)  # Debería ser negativo (grave)
+    
+    def test_frequency_to_note_high_range(self):
+        """Test detección de notas en rango agudo"""
+        # Test C5 (523.25 Hz)
+        note, deviation = frequency_to_note(523.25)
+        self.assertEqual(note, 'C5')
+        self.assertAlmostEqual(deviation, 0.0, delta=1.0)
+        
+        # Test A5 (880 Hz) - traste 12 primera cuerda
+        note, deviation = frequency_to_note(880.0)
+        self.assertEqual(note, 'A5')
+        self.assertAlmostEqual(deviation, 0.0, delta=1.0)
+    
+    def test_frequency_to_note_low_range(self):
+        """Test detección de notas en rango grave"""
+        # Test C3 (130.81 Hz)
+        note, deviation = frequency_to_note(130.81)
+        self.assertEqual(note, 'C3')
+        self.assertAlmostEqual(deviation, 0.0, delta=1.0)
+        
+        # Test G3 (196 Hz)
+        note, deviation = frequency_to_note(196.0)
+        self.assertEqual(note, 'G3')
+        self.assertAlmostEqual(deviation, 0.0, delta=1.0)
+    
+    def test_frequency_to_note_out_of_range(self):
+        """Test frecuencia muy alejada de cualquier nota"""
+        # Frecuencia muy alta, fuera del rango musical
+        note, deviation = frequency_to_note(5000.0)
+        self.assertIsNone(note)
+        self.assertEqual(deviation, 0)
 
 
 if __name__ == '__main__':

@@ -277,12 +277,16 @@ class TunerMode:
     
     def _draw_ukulele_reference(self):
         """Dibuja referencia técnica de las cuerdas del ukulele"""
-        # Cuerdas del ukulele con información técnica
+        # Cuerdas del ukulele con información técnica extendida
         strings_info = [
-            ("4ª cuerda", "G4", "392.0 Hz"),
-            ("3ª cuerda", "C4", "261.6 Hz"),
-            ("2ª cuerda", "E4", "329.6 Hz"),
-            ("1ª cuerda", "A4", "440.0 Hz")
+            ("4ª cuerda al aire", "G4", "392.0 Hz"),
+            ("3ª cuerda al aire", "C4", "261.6 Hz"),
+            ("2ª cuerda al aire", "E4", "329.6 Hz"),
+            ("1ª cuerda al aire", "A4", "440.0 Hz"),
+            ("", "", ""),  # Separador
+            ("Rango extendido:", "", ""),
+            ("Traste 12 (1ª)", "A5", "880.0 Hz"),
+            ("Armónicos hasta", "E6", "1318.5 Hz")
         ]
         
         x_start = 50
@@ -293,19 +297,23 @@ class TunerMode:
         self.screen.blit(title_text, (x_start, y_start - 30))
         
         for i, (string_name, note, freq) in enumerate(strings_info):
-            y_pos = y_start + i * 30
+            y_pos = y_start + i * 25
             
-            # Nombre de la cuerda
+            if string_name == "" and note == "" and freq == "":
+                continue  # Saltar separadores
+                
+            # Nombre de la cuerda/traste
             name_text = self.font_small.render(string_name, True, TEXT_COLOR)
             self.screen.blit(name_text, (x_start, y_pos))
             
-            # Nota
-            note_text = self.font_small.render(note, True, HIGHLIGHT_COLOR)
-            self.screen.blit(note_text, (x_start + 80, y_pos))
-            
-            # Frecuencia
-            freq_text = self.font_small.render(freq, True, TEXT_COLOR)
-            self.screen.blit(freq_text, (x_start + 120, y_pos))
+            if note and freq:
+                # Nota
+                note_text = self.font_small.render(note, True, HIGHLIGHT_COLOR)
+                self.screen.blit(note_text, (x_start + 120, y_pos))
+                
+                # Frecuencia
+                freq_text = self.font_small.render(freq, True, TEXT_COLOR)
+                self.screen.blit(freq_text, (x_start + 160, y_pos))
 
 
 # Necesitamos importar math para los cálculos trigonométricos

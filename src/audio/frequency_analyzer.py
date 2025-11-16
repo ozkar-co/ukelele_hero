@@ -4,7 +4,7 @@ Análisis de frecuencia usando FFT (Fast Fourier Transform)
 
 import numpy as np
 from scipy import signal
-from ..utils.config import SAMPLE_RATE
+from ..utils.config import SAMPLE_RATE, MIN_FREQUENCY, MAX_FREQUENCY
 
 
 class FrequencyAnalyzer:
@@ -20,9 +20,9 @@ class FrequencyAnalyzer:
         # Frecuencias correspondientes a cada bin de la FFT
         self.freqs = np.fft.rfftfreq(window_size, 1/sample_rate)
         
-        # Rango de frecuencias de interés (para ukulele: ~200-600 Hz)
-        self.min_freq = 200
-        self.max_freq = 600
+        # Rango de frecuencias de interés (para ukulele: desde C3 hasta E6)
+        self.min_freq = MIN_FREQUENCY
+        self.max_freq = MAX_FREQUENCY
         
     def analyze_frequency(self, audio_data):
         """
