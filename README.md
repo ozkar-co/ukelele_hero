@@ -19,12 +19,13 @@ El proyecto se desarrolla en **tres etapas progresivas**, cada una construyendo 
 
 ## ✨ Funcionalidades Actuales (Etapa 1)
 
-### 🎤 Afinador Digital Profesional
+### 🎤 Detector de Notas para Desarrollo
 - **Detección precisa**: Identifica notas con precisión de ±10 cents
 - **Tiempo real**: Respuesta instantánea (<50ms de latencia)
-- **Visualización clara**: Medidor tipo aguja con colores intuitivos
-- **Feedback completo**: Barras de confianza, volumen y estado de afinación
-- **Referencia integrada**: Guía visual de las cuerdas del ukulele
+- **Métricas de desarrollo**: Muestra frecuencia exacta, confianza y desviación
+- **Herramientas de calibración**: Permite ajustar tolerancias y umbrales
+- **Análisis visual**: Medidor de precisión y barras de información técnica
+- **Referencia técnica**: Especificaciones de frecuencias del ukulele
 
 ### 🎨 Interfaz Gráfica Moderna
 - Diseño limpio y profesional
@@ -34,14 +35,15 @@ El proyecto se desarrolla en **tres etapas progresivas**, cada una construyendo 
 
 ## 🏗️ Etapas de Desarrollo
 
-### 📊 Etapa 1: Afinador Digital (Prueba de Concepto)
-- **Objetivo**: Detectar y mostrar la nota musical tocada en tiempo real
+### 📊 Etapa 1: Detector de Notas (Calibración y Desarrollo)
+- **Objetivo**: Detectar y analizar notas musicales en tiempo real para calibración del juego
 - **Funcionalidades**:
   - Captura de audio desde micrófono
   - Análisis de frecuencia usando FFT
-  - Detección de nota musical (C, D, E, F, G, A, B)
-  - Display visual de la nota detectada
-  - Indicador de afinación (muy bajo, perfecto, muy alto)
+  - Detección precisa de nota musical (C, D, E, F, G, A, B)
+  - Display visual de la nota detectada con métricas
+  - Indicador de precisión y confianza de detección
+  - Herramientas de calibración para desarrolladores
 
 ### 🎮 Etapa 2: Simon Musical
 - **Objetivo**: Juego de secuencias para calibrar tolerancias y entrenar al jugador
@@ -159,14 +161,16 @@ pip install -r requirements.txt
 python3 main.py
 ```
 
-### 🎮 Uso Actual - Etapa 1: Afinador
+### 🎮 Uso Actual - Etapa 1: Detector de Notas
 1. Ejecuta `python3 main.py`
-2. Selecciona "1. Afinador (Etapa 1)" en el menú
+2. Selecciona "1. Detector de Notas (Etapa 1)" en el menú
 3. Toca una cuerda del ukulele cerca del micrófono
-4. Observa la nota detectada y ajusta la afinación según los indicadores:
-   - **Verde (¡AFINADO!)**: La cuerda está correctamente afinada
-   - **Naranja (MUY AGUDO)**: Afloja la cuerda
-   - **Cyan (MUY GRAVE)**: Tensa la cuerda
+4. Analiza las métricas de detección para calibración:
+   - **Nota detectada**: Muestra la nota musical identificada
+   - **Frecuencia exacta**: Valor en Hz para análisis técnico
+   - **Confianza**: Porcentaje de certeza en la detección
+   - **Desviación**: Diferencia en cents respecto a la frecuencia teórica
+   - **Volumen**: Nivel de entrada del micrófono
 
 ## 🎮 Controles
 
@@ -215,12 +219,13 @@ El archivo `src/utils/config.py` contiene la configuración personalizable:
 ### ✅ Versión 0.1 (Etapa 1) - COMPLETADA
 - [x] Configuración inicial del proyecto
 - [x] Implementar captura de audio
-- [x] Desarrollar detector de notas
-- [x] Crear interfaz del afinador
-- [x] Testing básico
+- [x] Desarrollar detector de notas avanzado
+- [x] Crear interfaz de análisis y calibración
+- [x] Sistema de métricas para desarrollo
+- [x] Testing básico y validación
 - [x] Sistema FFT para análisis de frecuencia
-- [x] Visualización en tiempo real
-- [x] Documentación completa
+- [x] Visualización técnica en tiempo real
+- [x] Documentación completa para desarrolladores
 
 ### 🔄 Versión 0.2 (Etapa 2) - PLANIFICADA
 - [ ] Implementar lógica de Simon Says
@@ -248,11 +253,12 @@ Este es un proyecto educativo. Las contribuciones son bienvenidas mediante:
 ## 🎯 Estado Actual del Proyecto
 
 ### ✅ Etapa 1 - COMPLETADA (v0.1.0)
-**🎤 Afinador Digital Funcional**
-- Sistema de detección de notas en tiempo real
-- Interfaz gráfica intuitiva y profesional
-- Análisis FFT avanzado con filtrado de ruido
-- Tests unitarios y documentación completa
+**🎤 Detector de Notas para Calibración**
+- Sistema de detección de notas en tiempo real con métricas técnicas
+- Interfaz de desarrollo con información detallada de análisis
+- Análisis FFT avanzado con filtrado de ruido y métricas de confianza
+- Herramientas de calibración para ajuste de tolerancias
+- Tests unitarios y documentación completa para desarrolladores
 - Compatible con Ubuntu/Debian Linux
 
 ### 🔄 Próximos Pasos

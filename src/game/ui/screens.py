@@ -16,7 +16,7 @@ class MainMenu:
         
         # Opciones del menú
         self.menu_options = [
-            "1. Afinador (Etapa 1)",
+            "1. Detector de Notas (Etapa 1)",
             "2. Simon Musical (Etapa 2)", 
             "3. Juego Completo (Etapa 3)",
             "4. Configuración",
@@ -38,10 +38,10 @@ class MainMenu:
     def select_option(self):
         """Procesar la opción seleccionada"""
         if self.selected_option == 0:
-            print("Iniciando Afinador...")
+            print("Iniciando Detector de Notas...")
             from ..tuner_mode import TunerMode
-            tuner = TunerMode(self.screen)
-            tuner.start()
+            detector = TunerMode(self.screen)
+            detector.start()
         elif self.selected_option == 1:
             print("Iniciando Simon Musical...")
             # TODO: Implementar modo Simon

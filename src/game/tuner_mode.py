@@ -1,6 +1,6 @@
 """
-Modo Afinador - Etapa 1 del juego Ukulele Master
-Muestra la nota detectada y su estado de afinación
+Modo Detector de Notas - Etapa 1 del juego Ukulele Master
+Detecta y analiza notas en tiempo real para calibración y desarrollo
 """
 
 import pygame
@@ -11,7 +11,7 @@ from ..utils.helpers import format_frequency, format_cents
 
 
 class TunerMode:
-    """Modo afinador para detectar y mostrar notas en tiempo real"""
+    """Modo detector de notas para análisis en tiempo real y calibración del juego"""
     
     def __init__(self, screen):
         self.screen = screen
@@ -35,8 +35,8 @@ class TunerMode:
         self.volume_bars = []
         
     def start(self):
-        """Inicia el modo afinador"""
-        print("Iniciando modo afinador...")
+        """Inicia el modo detector de notas"""
+        print("Iniciando modo detector de notas...")
         
         # Iniciar detector de notas
         if not self.note_detector.start_detection():
@@ -48,13 +48,13 @@ class TunerMode:
         return True
     
     def stop(self):
-        """Detiene el modo afinador"""
+        """Detiene el modo detector de notas"""
         self.is_running = False
         self.note_detector.stop_detection()
-        print("Modo afinador detenido")
+        print("Modo detector de notas detenido")
     
     def run(self):
-        """Bucle principal del modo afinador"""
+        """Bucle principal del modo detector de notas"""
         while self.is_running:
             # Manejar eventos
             for event in pygame.event.get():
@@ -108,7 +108,7 @@ class TunerMode:
         self.screen.fill(BACKGROUND_COLOR)
         
         # Título
-        title_text = self.font_large.render("🎵 AFINADOR UKULELE 🎵", True, HIGHLIGHT_COLOR)
+        title_text = self.font_large.render("🎵 DETECTOR DE NOTAS 🎵", True, HIGHLIGHT_COLOR)
         title_rect = title_text.get_rect(center=(WINDOW_WIDTH // 2, 80))
         self.screen.blit(title_text, title_rect)
         
@@ -148,24 +148,24 @@ class TunerMode:
         freq_rect = freq_text.get_rect(center=(WINDOW_WIDTH // 2, 300))
         self.screen.blit(freq_text, freq_rect)
         
-        # Estado de afinación
+        # Estado de detección y precisión
         tuning_status = detection['tuning_status']
         if tuning_status == 'perfect':
             status_color = SUCCESS_COLOR
-            status_text = "¡AFINADO!"
+            status_text = "DETECCIÓN PRECISA"
         elif tuning_status == 'sharp':
             status_color = ORANGE
-            status_text = "MUY AGUDO"
+            status_text = f"AGUDO (+{abs(detection['deviation']):.1f}¢)"
         else:  # flat
             status_color = CYAN
-            status_text = "MUY GRAVE"
+            status_text = f"GRAVE ({detection['deviation']:.1f}¢)"
         
         tuning_surface = self.font_medium.render(status_text, True, status_color)
         tuning_rect = tuning_surface.get_rect(center=(WINDOW_WIDTH // 2, 340))
         self.screen.blit(tuning_surface, tuning_rect)
         
-        # Desviación en cents
-        cents_text = format_cents(detection['deviation'])
+        # Información técnica detallada
+        cents_text = f"Desviación: {format_cents(detection['deviation'])}"
         cents_surface = self.font_medium.render(cents_text, True, TEXT_COLOR)
         cents_rect = cents_surface.get_rect(center=(WINDOW_WIDTH // 2, 370))
         self.screen.blit(cents_surface, cents_rect)
@@ -276,8 +276,8 @@ class TunerMode:
             y_offset += 25
     
     def _draw_ukulele_reference(self):
-        """Dibuja referencia de las cuerdas del ukulele"""
-        # Cuerdas del ukulele
+        """Dibuja referencia técnica de las cuerdas del ukulele"""
+        # Cuerdas del ukulele con información técnica
         strings_info = [
             ("4ª cuerda", "G4", "392.0 Hz"),
             ("3ª cuerda", "C4", "261.6 Hz"),
@@ -289,7 +289,7 @@ class TunerMode:
         y_start = 200
         
         # Título
-        title_text = self.font_medium.render("Referencia Ukulele:", True, HIGHLIGHT_COLOR)
+        title_text = self.font_medium.render("Referencia Técnica:", True, HIGHLIGHT_COLOR)
         self.screen.blit(title_text, (x_start, y_start - 30))
         
         for i, (string_name, note, freq) in enumerate(strings_info):
