@@ -1,0 +1,7 @@
+pygame>=2.5.0
+numpy>=1.24.0
+pyaudio>=0.2.11
+scipy>=1.10.0
+mido>=1.2.10
+pretty_midi>=0.2.9
+matplotlib>=3.6.0
