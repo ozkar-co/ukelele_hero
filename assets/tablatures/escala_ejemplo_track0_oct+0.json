@@ -1,0 +1,71 @@
+{
+  "version": "1.0",
+  "source": {
+    "midi_file": "escala_ejemplo",
+    "track_index": 0
+  },
+  "configuration": {
+    "octaves_transposed": 0,
+    "tempo": 120
+  },
+  "notes": [
+    {
+      "pitch": 60,
+      "start_time": 0.0,
+      "end_time": 0.5,
+      "note_name": "C4"
+    },
+    {
+      "pitch": 62,
+      "start_time": 0.5,
+      "end_time": 1.0,
+      "note_name": "D4"
+    },
+    {
+      "pitch": 64,
+      "start_time": 1.0,
+      "end_time": 1.5,
+      "note_name": "E4"
+    },
+    {
+      "pitch": 65,
+      "start_time": 1.5,
+      "end_time": 2.0,
+      "note_name": "F4"
+    },
+    {
+      "pitch": 67,
+      "start_time": 2.0,
+      "end_time": 2.5,
+      "note_name": "G4"
+    },
+    {
+      "pitch": 69,
+      "start_time": 2.5,
+      "end_time": 3.0,
+      "note_name": "A4"
+    },
+    {
+      "pitch": 71,
+      "start_time": 3.0,
+      "end_time": 3.5,
+      "note_name": "B4"
+    },
+    {
+      "pitch": 72,
+      "start_time": 3.5,
+      "end_time": 4.5,
+      "note_name": "C5"
+    }
+  ],
+  "statistics": {
+    "total_notes": 8,
+    "duration": 4.5,
+    "min_pitch": 60,
+    "max_pitch": 72
+  },
+  "metadata": {
+    "description": "Mi primer MIDI",
+    "created_by": "MIDI Tool"
+  }
+}
