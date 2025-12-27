@@ -1,4 +1,4 @@
-# 🎵 Ukulele Master 
+# Ukulele Master 
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://python.org)
 [![Platform](https://img.shields.io/badge/platform-Linux-green.svg)](https://github.com)
@@ -7,19 +7,19 @@
 
 Un innovador juego tipo Guitar Hero diseñado específicamente para ukulele, desarrollado en Python con pygame. Utiliza tecnología de detección de audio en tiempo real para crear una experiencia interactiva única de aprendizaje musical.
 
-## 🎯 Descripción del Proyecto
+## Descripción del Proyecto
 
 **Ukulele Master** es más que un simple afinador: es un ecosistema completo de aprendizaje musical que combina:
-- 🎤 **Detección de audio avanzada** usando análisis FFT
-- 🎮 **Interfaz de juego intuitiva** con feedback visual en tiempo real
-- 🎵 **Progresión educativa** desde afinación básica hasta juego completo
-- 🏆 **Sistema de gamificación** para motivar el aprendizaje
+- **Detección de audio avanzada** usando análisis FFT
+- **Interfaz de juego intuitiva** con feedback visual en tiempo real
+- **Progresión educativa** desde afinación básica hasta juego completo
+- **Sistema de gamificación** para motivar el aprendizaje
 
 El proyecto se desarrolla en **tres etapas progresivas**, cada una construyendo sobre la anterior para crear una experiencia de aprendizaje completa y divertida.
 
-## ✨ Funcionalidades Actuales (Etapa 1)
+## Funcionalidades Actuales (Etapa 1)
 
-### 🎤 Detector de Notas para Desarrollo
+### Detector de Notas para Desarrollo
 - **Detección precisa**: Identifica notas con precisión de ±10 cents
 - **Tiempo real**: Respuesta instantánea (<50ms de latencia)
 - **Métricas de desarrollo**: Muestra frecuencia exacta, confianza y desviación
@@ -27,15 +27,15 @@ El proyecto se desarrolla en **tres etapas progresivas**, cada una construyendo 
 - **Análisis visual**: Medidor de precisión y barras de información técnica
 - **Referencia técnica**: Especificaciones de frecuencias del ukulele
 
-### 🎨 Interfaz Gráfica Moderna
+### Interfaz Gráfica Moderna
 - Diseño limpio y profesional
 - Colores intuitivos para diferentes estados
 - Animaciones suaves a 60 FPS
 - Controles simples y accesibles
 
-## 🏗️ Etapas de Desarrollo
+## Etapas de Desarrollo
 
-### 📊 Etapa 1: Detector de Notas (Calibración y Desarrollo)
+### Etapa 1: Detector de Notas (Calibración y Desarrollo)
 - **Objetivo**: Detectar y analizar notas musicales en tiempo real para calibración del juego
 - **Funcionalidades**:
   - Captura de audio desde micrófono
@@ -45,7 +45,7 @@ El proyecto se desarrolla en **tres etapas progresivas**, cada una construyendo 
   - Indicador de precisión y confianza de detección
   - Herramientas de calibración para desarrolladores
 
-### 🎮 Etapa 2: Simon Musical
+### Etapa 2: Simon Musical
 - **Objetivo**: Juego de secuencias para calibrar tolerancias y entrenar al jugador
 - **Funcionalidades**:
   - Reproducción de secuencias de notas
@@ -55,7 +55,7 @@ El proyecto se desarrolla en **tres etapas progresivas**, cada una construyendo 
   - Ajuste automático de tolerancias de afinación
   - Feedback visual y auditivo
 
-### 🚀 Etapa 3: Juego Completo
+### Etapa 3: Juego Completo
 - **Objetivo**: Experiencia completa tipo Guitar Hero para ukulele
 - **Funcionalidades**:
   - Carga de canciones desde archivos MIDI
@@ -66,7 +66,7 @@ El proyecto se desarrolla en **tres etapas progresivas**, cada una construyendo 
   - Efectos visuales y sonoros
   - Modo práctica y modo competición
 
-## 🛠️ Tecnologías Utilizadas
+## Tecnologías Utilizadas
 
 - **Python 3.8+**: Lenguaje principal
 - **pygame**: Motor de juego y gráficos
@@ -76,7 +76,7 @@ El proyecto se desarrolla en **tres etapas progresivas**, cada una construyendo 
 - **mido**: Manejo de archivos MIDI (Etapa 3)
 - **pretty_midi**: Análisis avanzado de MIDI (Etapa 3)
 
-## 📁 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 ukelele_hero/
@@ -122,7 +122,7 @@ ukelele_hero/
     └── test_music.py
 ```
 
-## 🎵 Configuración del Ukulele
+## Configuración del Ukulele
 
 El juego está configurado para la afinación estándar del ukulele:
 - **4ª cuerda (G)**: G4 (392 Hz)
@@ -130,7 +130,7 @@ El juego está configurado para la afinación estándar del ukulele:
 - **2ª cuerda (E)**: E4 (329 Hz)
 - **1ª cuerda (A)**: A4 (440 Hz)
 
-## 🚀 Instalación y Uso
+## Instalación y Uso
 
 ### Prerrequisitos
 - Python 3.8 o superior
@@ -161,7 +161,7 @@ pip install -r requirements.txt
 python3 main.py
 ```
 
-### 🎮 Uso Actual - Etapa 1: Detector de Notas
+### Uso Actual - Etapa 1: Detector de Notas
 1. Ejecuta `python3 main.py`
 2. Selecciona "1. Detector de Notas (Etapa 1)" en el menú
 3. Toca una cuerda del ukulele cerca del micrófono
@@ -172,7 +172,7 @@ python3 main.py
    - **Desviación**: Diferencia en cents respecto a la frecuencia teórica
    - **Volumen**: Nivel de entrada del micrófono
 
-## 🎮 Controles
+## Controles
 
 - **Espacio**: Pausar/Reanudar
 - **ESC**: Menú principal
@@ -180,7 +180,7 @@ python3 main.py
 - **Flechas**: Navegación en menús
 - **R**: Reiniciar nivel actual
 
-## 🔧 Configuración
+## Configuración
 
 El archivo `src/utils/config.py` contiene la configuración personalizable:
 - Sensibilidad del micrófono
@@ -189,9 +189,9 @@ El archivo `src/utils/config.py` contiene la configuración personalizable:
 - Resolución de pantalla
 - FPS del juego
 
-## 📊 Características Técnicas
+## Características Técnicas
 
-### 🔧 Características Técnicas Implementadas
+### Características Técnicas Implementadas
 
 #### Detección de Audio
 - **Frecuencia de muestreo**: 44.1 kHz
@@ -207,16 +207,16 @@ El archivo `src/utils/config.py` contiene la configuración personalizable:
 - **Precisión de detección**: ±2 Hz con señal limpia
 
 #### Funcionalidades Actuales
-- ✅ Detección en tiempo real de notas musicales
-- ✅ Visualización con aguja de afinación
-- ✅ Barras de confianza y volumen
-- ✅ Referencia visual de cuerdas del ukulele
-- ✅ Suavizado de detección para estabilidad
-- ✅ Controles de pausa/reanudación
+- Detección en tiempo real de notas musicales
+- Visualización con aguja de afinación
+- Barras de confianza y volumen
+- Referencia visual de cuerdas del ukulele
+- Suavizado de detección para estabilidad
+- Controles de pausa/reanudación
 
-## 🎯 Estado del Desarrollo
+## Estado del Desarrollo
 
-### ✅ Versión 0.1 (Etapa 1) - COMPLETADA
+### Versión 0.1 (Etapa 1) - COMPLETADA
 - [x] Configuración inicial del proyecto
 - [x] Implementar captura de audio
 - [x] Desarrollar detector de notas avanzado
@@ -227,14 +227,14 @@ El archivo `src/utils/config.py` contiene la configuración personalizable:
 - [x] Visualización técnica en tiempo real
 - [x] Documentación completa para desarrolladores
 
-### 🔄 Versión 0.2 (Etapa 2) - PLANIFICADA
+### Versión 0.2 (Etapa 2) - PLANIFICADA
 - [ ] Implementar lógica de Simon Says
 - [ ] Sistema de secuencias musicales
 - [ ] Interfaz de juego Simon
 - [ ] Sistema de calibración de tolerancias
 - [ ] Puntuación básica
 
-### 🚀 Versión 1.0 (Etapa 3) - FUTURA
+### Versión 1.0 (Etapa 3) - FUTURA
 - [ ] Parser de archivos MIDI
 - [ ] Parser de tablature ASCII
 - [ ] Motor de juego completo
@@ -242,7 +242,7 @@ El archivo `src/utils/config.py` contiene la configuración personalizable:
 - [ ] Múltiples canciones y niveles
 - [ ] Efectos visuales y sonoros
 
-## 🤝 Contribución
+## Contribución
 
 Este es un proyecto educativo. Las contribuciones son bienvenidas mediante:
 1. Fork del repositorio
@@ -250,10 +250,10 @@ Este es un proyecto educativo. Las contribuciones son bienvenidas mediante:
 3. Commit de los cambios
 4. Pull request con descripción detallada
 
-## 🎯 Estado Actual del Proyecto
+## Estado Actual del Proyecto
 
-### ✅ Etapa 1 - COMPLETADA (v0.1.0)
-**🎤 Detector de Notas para Calibración**
+### Etapa 1 - COMPLETADA (v0.1.0)
+**Detector de Notas para Calibración**
 - Sistema de detección de notas en tiempo real con métricas técnicas
 - Interfaz de desarrollo con información detallada de análisis
 - Análisis FFT avanzado con filtrado de ruido y métricas de confianza
@@ -261,13 +261,13 @@ Este es un proyecto educativo. Las contribuciones son bienvenidas mediante:
 - Tests unitarios y documentación completa para desarrolladores
 - Compatible con Ubuntu/Debian Linux
 
-### 🔄 Próximos Pasos
+### Próximos Pasos
 1. **Etapa 2**: Implementar modo Simon Musical
 2. **Etapa 3**: Desarrollar juego completo Guitar Hero
 3. Soporte multiplataforma (Windows, macOS)
 4. Mejoras de rendimiento y nuevas características
 
-## � Problemas Conocidos y Soluciones
+## Problemas Conocidos y Soluciones
 
 ### Audio en Linux
 Los mensajes de error ALSA y Jack son normales y no afectan la funcionalidad:
@@ -283,18 +283,18 @@ Si encuentras problemas con `pyaudio`, asegúrate de instalar las dependencias d
 sudo apt install portaudio19-dev python3-dev
 ```
 
-## 📊 Estadísticas del Proyecto
+## Estadísticas del Proyecto
 - **Líneas de código**: ~1,500
 - **Archivos Python**: 15+
 - **Tests unitarios**: 8 casos de prueba
 - **Documentación**: Completa (README, INSTALL, STATUS)
 - **Cobertura de tests**: 100% en componentes críticos
 
-## �📝 Licencia
+## Licencia
 
 MIT License - Ver archivo LICENSE para detalles.
 
-## 🤝 Contribución
+## Contribución
 
 ¡Las contribuciones son bienvenidas! Para contribuir:
 1. Fork el repositorio
@@ -303,9 +303,9 @@ MIT License - Ver archivo LICENSE para detalles.
 4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
 5. Abre un Pull Request
 
-## 🎵 Créditos
+## Créditos
 
-Desarrollado con ❤️ para la comunidad de músicos y programadores.
+Desarrollado con amor para la comunidad de músicos y programadores.
 
 **Tecnologías utilizadas:**
 - Python 3 + pygame para la interfaz
@@ -314,6 +314,6 @@ Desarrollado con ❤️ para la comunidad de músicos y programadores.
 - FFT para análisis de frecuencia
 
 ---
-**🎸 ¡La música está en tus manos! 🎵**
+**¡La música está en tus manos!**
 
 > "La música es el lenguaje universal de la humanidad" - Henry Wadsworth Longfellow
