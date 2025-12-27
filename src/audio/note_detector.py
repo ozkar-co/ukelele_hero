@@ -2,10 +2,18 @@
 Detector de notas musicales basado en análisis de frecuencia
 """
 
-from .microphone import MicrophoneCapture
-from .frequency_analyzer import FrequencyAnalyzer
-from ..utils.helpers import frequency_to_note, get_tuning_status
-from ..utils.config import MIN_VOLUME_THRESHOLD
+import sys
+from pathlib import Path
+
+# Agregar src al path para imports absolutos
+current_dir = Path(__file__).parent.parent
+if str(current_dir) not in sys.path:
+    sys.path.insert(0, str(current_dir))
+
+from audio.microphone import MicrophoneCapture
+from audio.frequency_analyzer import FrequencyAnalyzer
+from utils.helpers import frequency_to_note, get_tuning_status
+from utils.config import MIN_VOLUME_THRESHOLD
 import time
 
 

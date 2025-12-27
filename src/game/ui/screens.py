@@ -3,7 +3,15 @@ Pantallas principales del juego Ukulele Master
 """
 
 import pygame
-from ...utils.config import *
+import sys
+from pathlib import Path
+
+# Agregar src al path para imports absolutos
+current_dir = Path(__file__).parent.parent.parent
+if str(current_dir) not in sys.path:
+    sys.path.insert(0, str(current_dir))
+
+from utils.config import *
 
 
 class MainMenu:

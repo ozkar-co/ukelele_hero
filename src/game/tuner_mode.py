@@ -5,9 +5,16 @@ Detecta y analiza notas en tiempo real para calibración y desarrollo
 
 import pygame
 import sys
-from ..audio.note_detector import NoteDetector
-from ..utils.config import *
-from ..utils.helpers import format_frequency, format_cents
+from pathlib import Path
+
+# Agregar src al path para imports absolutos
+current_dir = Path(__file__).parent.parent
+if str(current_dir) not in sys.path:
+    sys.path.insert(0, str(current_dir))
+
+from audio.note_detector import NoteDetector
+from utils.config import *
+from utils.helpers import format_frequency, format_cents
 
 
 class TunerMode:

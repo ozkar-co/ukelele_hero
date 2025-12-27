@@ -6,7 +6,15 @@ import sounddevice as sd
 import numpy as np
 import threading
 import time
-from ..utils.config import SAMPLE_RATE, BUFFER_SIZE, CHANNELS
+import sys
+from pathlib import Path
+
+# Agregar src al path para imports absolutos
+current_dir = Path(__file__).parent.parent
+if str(current_dir) not in sys.path:
+    sys.path.insert(0, str(current_dir))
+
+from utils.config import SAMPLE_RATE, BUFFER_SIZE, CHANNELS
 
 
 class MicrophoneCapture:
