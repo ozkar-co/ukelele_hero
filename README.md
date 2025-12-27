@@ -124,7 +124,14 @@ ukelele_hero/
 
 ## Configuración del Ukulele
 
-El juego está configurado para la afinación estándar del ukulele:
+El juego está configurado para la afinación estándar del ukulele soprano:
+
+```
+4ª cuerda: G (GCEA)
+3ª cuerda: C
+2ª cuerda: E
+1ª cuerda: A
+```
 - **4ª cuerda (G)**: G4 (392 Hz)
 - **3ª cuerda (C)**: C4 (261 Hz) 
 - **2ª cuerda (E)**: E4 (329 Hz)

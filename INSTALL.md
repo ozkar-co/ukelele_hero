@@ -64,7 +64,11 @@ sudo usermod -a -G audio $USER
 
 ### 🎵 Configuración del Ukulele
 
-1. **Afinación Estándar:**
+1. **Afinación Estándar (GCEA):**
+   - 4ª cuerda: G
+   - 3ª cuerda: C
+   - 2ª cuerda: E
+   - 1ª cuerda: A
    - 4ª cuerda: G4 (392 Hz)
    - 3ª cuerda: C4 (261 Hz)
    - 2ª cuerda: E4 (329 Hz)
