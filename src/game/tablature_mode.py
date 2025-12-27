@@ -93,13 +93,13 @@ class TablatureGameMode:
         Returns:
             bool: True si se cargó exitosamente
         """
-        print(f"⏳ Cargando tablatura: {tablature_name}...")
+        print(f"[LOADING] Cargando tablatura: {tablature_name}...")
         
         # Cargar datos JSON
         tab_data = self.tab_manager.load_tablature(tablature_name)
         
         if not tab_data:
-            print("❌ Error al cargar tablatura")
+            print("[ERROR] Error al cargar tablatura")
             return False
         
         # Convertir a formato UI
@@ -108,7 +108,7 @@ class TablatureGameMode:
         # Preparar notas
         self._prepare_notes()
         
-        print(f"✅ Tablatura cargada: {self.current_tablature['total_notes']} notas")
+        print(f"[OK] Tablatura cargada: {self.current_tablature['total_notes']} notas")
         return True
     
     def _prepare_notes(self):
@@ -133,10 +133,10 @@ class TablatureGameMode:
     def start(self):
         """Inicia el modo juego"""
         if not self.current_tablature:
-            print("❌ Ninguna tablatura cargada")
+            print("[ERROR] Ninguna tablatura cargada")
             return False
         
-        print("🎮 Iniciando modo juego...")
+        print("[GAME] Iniciando modo juego...")
         
         # Iniciar detector de notas
         if not self.note_detector.start_detection():
@@ -267,7 +267,7 @@ class TablatureGameMode:
             source = self.current_tablature['source']
             tempo = self.current_tablature['tempo']
             
-            header_text = f"🎸 {source} | ♪ {tempo} BPM | ⏱️ {self.current_time:.1f}s"
+            header_text = f"{source} | {tempo} BPM | {self.current_time:.1f}s"
             header_surface = self.font_medium.render(header_text, True, TEXT_COLOR)
             self.screen.blit(header_surface, (20, 10))
     
@@ -403,20 +403,20 @@ class TablatureGameMode:
             self._hit_notes = []
         self._hit_notes.append(note)
         
-        print(f"✅ {feedback} | +{points} pts | Combo: {self.combo}")
+        print(f"[HIT] {feedback} | +{points} pts | Combo: {self.combo}")
     
     def _on_note_miss(self, note):
         """Se ejecuta cuando se pierde una nota"""
         self.misses += 1
         self.combo = 0
-        print(f"❌ MISS | Traste {note['fret']} en cuerda {note['string']}")
+        print(f"[MISS] Traste {note['fret']} en cuerda {note['string']}")
     
     def _on_game_end(self):
         """Se ejecuta cuando el juego termina"""
         self.is_running = False
         
         print("\n" + "="*60)
-        print("🎮 JUEGO TERMINADO")
+        print("[GAME END]")
         print("="*60)
         print(f"Score Final: {self.score}")
         print(f"Combo Máximo: {self.max_combo}")

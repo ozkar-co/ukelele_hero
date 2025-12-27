@@ -33,13 +33,13 @@ class GameMenu:
         """Muestra el menú principal"""
         running = True
         selected = 0
-        options = ["Modo Juego", "Modo Afinador", "Salir"]
+        options = ["Modo Juego", "Detector de Notas", "Salir"]
         
         while running:
             self.screen.fill(BACKGROUND_COLOR)
             
             # Título
-            title = self.font_huge.render("🎸 UKULELE HERO", True, (255, 100, 100))
+            title = self.font_huge.render("UKULELE HERO", True, (255, 100, 100))
             title_rect = title.get_rect(center=(WINDOW_WIDTH // 2, 50))
             self.screen.blit(title, title_rect)
             
@@ -51,7 +51,7 @@ class GameMenu:
                 self.screen.blit(text, text_rect)
             
             # Instrucciones
-            instr = self.font_medium.render("↑/↓: Navegar | ENTER: Seleccionar", True, (150, 150, 150))
+            instr = self.font_medium.render("[FLECHAS]: Navegar | ENTER: Seleccionar", True, (150, 150, 150))
             instr_rect = instr.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 50))
             self.screen.blit(instr, instr_rect)
             
@@ -79,7 +79,7 @@ class GameMenu:
         tablatures = self.manager.get_saved_tablatures()
         
         if not tablatures:
-            print("❌ No hay tablaturas guardadas")
+            print("[ERROR] No hay tablaturas guardadas")
             input("Presiona ENTER para continuar...")
             return None
         
@@ -135,7 +135,7 @@ def main():
     
     # Crear ventana
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    pygame.display.set_caption("🎸 Ukulele Hero - Modo Tablaturas")
+    pygame.display.set_caption("Ukulele Hero - Modo Tablaturas")
     
     # Menú principal
     menu = GameMenu(screen)
@@ -159,7 +159,7 @@ def main():
                     # Iniciar juego
                     game_mode.start()
         
-        elif choice == 1:  # Modo Afinador
+        elif choice == 1:  # Detector de Notas
             tuner = TunerMode(screen)
             tuner.start()
         

@@ -1,238 +1,239 @@
-"""
-Cargador de archivos MIDI para extraer información de pistas
-"""
-
-import os
-from pathlib import Path
-import pretty_midi
-from typing import Optional, List, Tuple, Dict
-
-
-class MIDILoader:
-    """Carga y parsea archivos MIDI"""
-    
-    # Rango de notas MIDI para ukulele (típicamente C3 a E6)
-    UKULELE_MIN_NOTE = 36  # C2
-    UKULELE_MAX_NOTE = 88  # E6
-    
-    def __init__(self, midi_folder: str = None):
-        """
-        Inicializa el cargador MIDI
-        
-        Args:
-            midi_folder (str): Ruta a la carpeta con archivos MIDI
-                              Por defecto, usa assets/midi
-        """
-        if midi_folder is None:
-            # Usar carpeta assets/midi por defecto
-            project_root = Path(__file__).parent.parent.parent
-            midi_folder = project_root / "assets" / "midi"
-        
-        self.midi_folder = Path(midi_folder)
-        self.midi_files = []
-        self._scan_midi_files()
-    
-    def _scan_midi_files(self):
-        """Escanea la carpeta y lista todos los archivos .mid"""
-        if not self.midi_folder.exists():
-            print(f"⚠️ Carpeta MIDI no encontrada: {self.midi_folder}")
-            return
-        
-        self.midi_files = list(self.midi_folder.glob("*.mid")) + \
-                         list(self.midi_folder.glob("*.midi"))
-        self.midi_files.sort()
-        
-        if self.midi_files:
-            print(f"✅ {len(self.midi_files)} archivos MIDI encontrados")
-    
-    def get_midi_files(self) -> List[str]:
-        """
-        Retorna lista de nombres de archivos MIDI disponibles
-        
-        Returns:
-            List[str]: Nombres de los archivos MIDI
-        """
-        return [f.stem for f in self.midi_files]
-    
-    def load_midi(self, filename: str) -> Optional[pretty_midi.PrettyMIDI]:
-        """
-        Carga un archivo MIDI
-        
-        Args:
-            filename (str): Nombre del archivo (sin extensión)
-            
-        Returns:
-            pretty_midi.PrettyMIDI: Objeto MIDI o None si no existe
-        """
-        # Buscar archivo con extensión .mid o .midi
-        midi_file = self.midi_folder / f"{filename}.mid"
-        if not midi_file.exists():
-            midi_file = self.midi_folder / f"{filename}.midi"
-        
-        if not midi_file.exists():
-            print(f"❌ Archivo MIDI no encontrado: {filename}")
-            return None
-        
-        try:
-            midi = pretty_midi.PrettyMIDI(str(midi_file))
-            print(f"✅ MIDI cargado: {filename}")
-            return midi
-        except Exception as e:
-            print(f"❌ Error al cargar MIDI: {e}")
-            return None
-    
-    def get_track_info(self, midi: pretty_midi.PrettyMIDI) -> List[Dict]:
-        """
-        Obtiene información de todas las pistas
-        
-        Args:
-            midi (pretty_midi.PrettyMIDI): Objeto MIDI cargado
-            
-        Returns:
-            List[Dict]: Lista con info de cada pista
-        """
-        tracks_info = []
-        
-        for idx, instrument in enumerate(midi.instruments):
-            info = {
-                'index': idx,
-                'name': instrument.name or f"Pista {idx}",
-                'program': instrument.program,
-                'is_drum': instrument.is_drum,
-                'note_count': len(instrument.notes),
-                'start_time': instrument.notes[0].start if instrument.notes else 0,
-                'end_time': instrument.notes[-1].end if instrument.notes else 0,
-            }
-            tracks_info.append(info)
-        
-        return tracks_info
-    
-    def get_track_notes(self, midi: pretty_midi.PrettyMIDI, 
-                       track_index: int = 0) -> List[Tuple[int, float, float]]:
-        """
-        Extrae las notas de una pista específica
-        
-        Args:
-            midi (pretty_midi.PrettyMIDI): Objeto MIDI
-            track_index (int): Índice de la pista (por defecto 0)
-            
-        Returns:
-            List[Tuple[int, float, float]]: Lista de (pitch, start_time, end_time)
-        """
-        if track_index >= len(midi.instruments):
-            print(f"❌ Pista {track_index} no existe")
-            return []
-        
-        instrument = midi.instruments[track_index]
-        notes = []
-        
-        for note in instrument.notes:
-            # Filtrar notas dentro del rango del ukulele
-            if self.UKULELE_MIN_NOTE <= note.pitch <= self.UKULELE_MAX_NOTE:
-                notes.append((note.pitch, note.start, note.end))
-        
-        # Ordenar por tiempo de inicio
-        notes.sort(key=lambda x: x[1])
-        return notes
-    
-    @staticmethod
-    def midi_note_to_name(pitch: int) -> str:
-        """
-        Convierte número MIDI a nombre de nota
-        
-        Args:
-            pitch (int): Número MIDI (0-127)
-            
-        Returns:
-            str: Nombre de la nota (ej: "C4", "D#5")
-        """
-        note_names = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
-        octave = (pitch // 12) - 1
-        note_index = pitch % 12
-        return f"{note_names[note_index]}{octave}"
-    
-    @staticmethod
-    def midi_note_to_frequency(pitch: int) -> float:
-        """
-        Convierte número MIDI a frecuencia en Hz
-        
-        Args:
-            pitch (int): Número MIDI
-            
-        Returns:
-            float: Frecuencia en Hz
-        """
-        # A4 (pitch 69) = 440 Hz
-        return 440 * (2 ** ((pitch - 69) / 12))
-    
-    def transpose_notes(self, notes: List[Tuple[int, float, float]], 
-                       octaves: int = 0) -> List[Tuple[int, float, float]]:
-        """
-        Transpone notas por octavas completas
-        
-        Args:
-            notes (List[Tuple[int, float, float]]): Lista de (pitch, start_time, end_time)
-            octaves (int): Número de octavas a transponer (+/- 12 semitones por octava)
-            
-        Returns:
-            List[Tuple[int, float, float]]: Notas transponidas
-        """
-        semitones = octaves * 12
-        transposed = []
-        
-        for pitch, start, end in notes:
-            new_pitch = pitch + semitones
-            # Asegurar que esté dentro del rango MIDI válido (0-127)
-            new_pitch = max(0, min(127, new_pitch))
-            transposed.append((new_pitch, start, end))
-        
-        return transposed
-    
-    def get_notes_range(self, notes: List[Tuple[int, float, float]]) -> Tuple[int, int]:
-        """
-        Obtiene el rango (min, max) de notas
-        
-        Args:
-            notes (List[Tuple[int, float, float]]): Lista de (pitch, start_time, end_time)
-            
-        Returns:
-            Tuple[int, int]: (nota_mínima, nota_máxima) en MIDI
-        """
-        if not notes:
-            return (0, 0)
-        
-        pitches = [pitch for pitch, _, _ in notes]
-        return (min(pitches), max(pitches))
-    
-    def adjust_to_ukulele_range(self, notes: List[Tuple[int, float, float]]) -> Tuple[List[Tuple[int, float, float]], int]:
-        """
-        Ajusta automáticamente notas al rango del ukulele
-        
-        Args:
-            notes (List[Tuple[int, float, float]]): Lista de (pitch, start_time, end_time)
-            
-        Returns:
-            Tuple: (notas_ajustadas, octavas_transponidas)
-        """
-        min_note, max_note = self.get_notes_range(notes)
-        
-        # Rango típico del ukulele soprano: C4 (60) a E6 (88)
-        uke_min = 60  # C4
-        uke_max = 88  # E6
-        
-        octaves_needed = 0
-        adjusted_notes = notes
-        
-        # Si las notas están todas demasiado bajas
-        if max_note < uke_min:
-            while max(pitch for pitch, _, _ in adjusted_notes) < uke_min:
-                octaves_needed += 1
-                adjusted_notes = self.transpose_notes(adjusted_notes, 1)
-        
-        # Si las notas están todas demasiado altas
-        elif min_note > uke_max:
-            while min(pitch for pitch, _, _ in adjusted_notes) > uke_max:
-                octaves_needed -= 1
-                adjusted_notes = self.transpose_notes(adjusted_notes, -1)
-        
-        return adjusted_notes, octaves_needed
+[OK]"[OK]"[OK]"[OK]
+[OK]C[OK]a[OK]r[OK]g[OK]a[OK]d[OK]o[OK]r[OK] [OK]d[OK]e[OK] [OK]a[OK]r[OK]c[OK]h[OK]i[OK]v[OK]o[OK]s[OK] [OK]M[OK]I[OK]D[OK]I[OK] [OK]p[OK]a[OK]r[OK]a[OK] [OK]e[OK]x[OK]t[OK]r[OK]a[OK]e[OK]r[OK] [OK]i[OK]n[OK]f[OK]o[OK]r[OK]m[OK]a[OK]c[OK]i[OK]ó[OK]n[OK] [OK]d[OK]e[OK] [OK]p[OK]i[OK]s[OK]t[OK]a[OK]s[OK]
+[OK]"[OK]"[OK]"[OK]
+[OK]
+[OK]i[OK]m[OK]p[OK]o[OK]r[OK]t[OK] [OK]o[OK]s[OK]
+[OK]f[OK]r[OK]o[OK]m[OK] [OK]p[OK]a[OK]t[OK]h[OK]l[OK]i[OK]b[OK] [OK]i[OK]m[OK]p[OK]o[OK]r[OK]t[OK] [OK]P[OK]a[OK]t[OK]h[OK]
+[OK]i[OK]m[OK]p[OK]o[OK]r[OK]t[OK] [OK]p[OK]r[OK]e[OK]t[OK]t[OK]y[OK]_[OK]m[OK]i[OK]d[OK]i[OK]
+[OK]f[OK]r[OK]o[OK]m[OK] [OK]t[OK]y[OK]p[OK]i[OK]n[OK]g[OK] [OK]i[OK]m[OK]p[OK]o[OK]r[OK]t[OK] [OK]O[OK]p[OK]t[OK]i[OK]o[OK]n[OK]a[OK]l[OK],[OK] [OK]L[OK]i[OK]s[OK]t[OK],[OK] [OK]T[OK]u[OK]p[OK]l[OK]e[OK],[OK] [OK]D[OK]i[OK]c[OK]t[OK]
+[OK]
+[OK]
+[OK]c[OK]l[OK]a[OK]s[OK]s[OK] [OK]M[OK]I[OK]D[OK]I[OK]L[OK]o[OK]a[OK]d[OK]e[OK]r[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK]"[OK]"[OK]"[OK]C[OK]a[OK]r[OK]g[OK]a[OK] [OK]y[OK] [OK]p[OK]a[OK]r[OK]s[OK]e[OK]a[OK] [OK]a[OK]r[OK]c[OK]h[OK]i[OK]v[OK]o[OK]s[OK] [OK]M[OK]I[OK]D[OK]I[OK]"[OK]"[OK]"[OK]
+[OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK]#[OK] [OK]R[OK]a[OK]n[OK]g[OK]o[OK] [OK]d[OK]e[OK] [OK]n[OK]o[OK]t[OK]a[OK]s[OK] [OK]M[OK]I[OK]D[OK]I[OK] [OK]p[OK]a[OK]r[OK]a[OK] [OK]u[OK]k[OK]u[OK]l[OK]e[OK]l[OK]e[OK] [OK]([OK]t[OK]í[OK]p[OK]i[OK]c[OK]a[OK]m[OK]e[OK]n[OK]t[OK]e[OK] [OK]C[OK]3[OK] [OK]a[OK] [OK]E[OK]6[OK])[OK]
+[OK] [OK] [OK] [OK] [OK]U[OK]K[OK]U[OK]L[OK]E[OK]L[OK]E[OK]_[OK]M[OK]I[OK]N[OK]_[OK]N[OK]O[OK]T[OK]E[OK] [OK]=[OK] [OK]3[OK]6[OK] [OK] [OK]#[OK] [OK]C[OK]2[OK]
+[OK] [OK] [OK] [OK] [OK]U[OK]K[OK]U[OK]L[OK]E[OK]L[OK]E[OK]_[OK]M[OK]A[OK]X[OK]_[OK]N[OK]O[OK]T[OK]E[OK] [OK]=[OK] [OK]8[OK]8[OK] [OK] [OK]#[OK] [OK]E[OK]6[OK]
+[OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK]d[OK]e[OK]f[OK] [OK]_[OK]_[OK]i[OK]n[OK]i[OK]t[OK]_[OK]_[OK]([OK]s[OK]e[OK]l[OK]f[OK],[OK] [OK]m[OK]i[OK]d[OK]i[OK]_[OK]f[OK]o[OK]l[OK]d[OK]e[OK]r[OK]:[OK] [OK]s[OK]t[OK]r[OK] [OK]=[OK] [OK]N[OK]o[OK]n[OK]e[OK])[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]"[OK]"[OK]"[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]I[OK]n[OK]i[OK]c[OK]i[OK]a[OK]l[OK]i[OK]z[OK]a[OK] [OK]e[OK]l[OK] [OK]c[OK]a[OK]r[OK]g[OK]a[OK]d[OK]o[OK]r[OK] [OK]M[OK]I[OK]D[OK]I[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]A[OK]r[OK]g[OK]s[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]m[OK]i[OK]d[OK]i[OK]_[OK]f[OK]o[OK]l[OK]d[OK]e[OK]r[OK] [OK]([OK]s[OK]t[OK]r[OK])[OK]:[OK] [OK]R[OK]u[OK]t[OK]a[OK] [OK]a[OK] [OK]l[OK]a[OK] [OK]c[OK]a[OK]r[OK]p[OK]e[OK]t[OK]a[OK] [OK]c[OK]o[OK]n[OK] [OK]a[OK]r[OK]c[OK]h[OK]i[OK]v[OK]o[OK]s[OK] [OK]M[OK]I[OK]D[OK]I[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]P[OK]o[OK]r[OK] [OK]d[OK]e[OK]f[OK]e[OK]c[OK]t[OK]o[OK],[OK] [OK]u[OK]s[OK]a[OK] [OK]a[OK]s[OK]s[OK]e[OK]t[OK]s[OK]/[OK]m[OK]i[OK]d[OK]i[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]"[OK]"[OK]"[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]i[OK]f[OK] [OK]m[OK]i[OK]d[OK]i[OK]_[OK]f[OK]o[OK]l[OK]d[OK]e[OK]r[OK] [OK]i[OK]s[OK] [OK]N[OK]o[OK]n[OK]e[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]#[OK] [OK]U[OK]s[OK]a[OK]r[OK] [OK]c[OK]a[OK]r[OK]p[OK]e[OK]t[OK]a[OK] [OK]a[OK]s[OK]s[OK]e[OK]t[OK]s[OK]/[OK]m[OK]i[OK]d[OK]i[OK] [OK]p[OK]o[OK]r[OK] [OK]d[OK]e[OK]f[OK]e[OK]c[OK]t[OK]o[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]p[OK]r[OK]o[OK]j[OK]e[OK]c[OK]t[OK]_[OK]r[OK]o[OK]o[OK]t[OK] [OK]=[OK] [OK]P[OK]a[OK]t[OK]h[OK]([OK]_[OK]_[OK]f[OK]i[OK]l[OK]e[OK]_[OK]_[OK])[OK].[OK]p[OK]a[OK]r[OK]e[OK]n[OK]t[OK].[OK]p[OK]a[OK]r[OK]e[OK]n[OK]t[OK].[OK]p[OK]a[OK]r[OK]e[OK]n[OK]t[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]m[OK]i[OK]d[OK]i[OK]_[OK]f[OK]o[OK]l[OK]d[OK]e[OK]r[OK] [OK]=[OK] [OK]p[OK]r[OK]o[OK]j[OK]e[OK]c[OK]t[OK]_[OK]r[OK]o[OK]o[OK]t[OK] [OK]/[OK] [OK]"[OK]a[OK]s[OK]s[OK]e[OK]t[OK]s[OK]"[OK] [OK]/[OK] [OK]"[OK]m[OK]i[OK]d[OK]i[OK]"[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]s[OK]e[OK]l[OK]f[OK].[OK]m[OK]i[OK]d[OK]i[OK]_[OK]f[OK]o[OK]l[OK]d[OK]e[OK]r[OK] [OK]=[OK] [OK]P[OK]a[OK]t[OK]h[OK]([OK]m[OK]i[OK]d[OK]i[OK]_[OK]f[OK]o[OK]l[OK]d[OK]e[OK]r[OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]s[OK]e[OK]l[OK]f[OK].[OK]m[OK]i[OK]d[OK]i[OK]_[OK]f[OK]i[OK]l[OK]e[OK]s[OK] [OK]=[OK] [OK][[OK]][OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]s[OK]e[OK]l[OK]f[OK].[OK]_[OK]s[OK]c[OK]a[OK]n[OK]_[OK]m[OK]i[OK]d[OK]i[OK]_[OK]f[OK]i[OK]l[OK]e[OK]s[OK]([OK])[OK]
+[OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK]d[OK]e[OK]f[OK] [OK]_[OK]s[OK]c[OK]a[OK]n[OK]_[OK]m[OK]i[OK]d[OK]i[OK]_[OK]f[OK]i[OK]l[OK]e[OK]s[OK]([OK]s[OK]e[OK]l[OK]f[OK])[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]"[OK]"[OK]"[OK]E[OK]s[OK]c[OK]a[OK]n[OK]e[OK]a[OK] [OK]l[OK]a[OK] [OK]c[OK]a[OK]r[OK]p[OK]e[OK]t[OK]a[OK] [OK]y[OK] [OK]l[OK]i[OK]s[OK]t[OK]a[OK] [OK]t[OK]o[OK]d[OK]o[OK]s[OK] [OK]l[OK]o[OK]s[OK] [OK]a[OK]r[OK]c[OK]h[OK]i[OK]v[OK]o[OK]s[OK] [OK].[OK]m[OK]i[OK]d[OK]"[OK]"[OK]"[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]i[OK]f[OK] [OK]n[OK]o[OK]t[OK] [OK]s[OK]e[OK]l[OK]f[OK].[OK]m[OK]i[OK]d[OK]i[OK]_[OK]f[OK]o[OK]l[OK]d[OK]e[OK]r[OK].[OK]e[OK]x[OK]i[OK]s[OK]t[OK]s[OK]([OK])[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]p[OK]r[OK]i[OK]n[OK]t[OK]([OK]f[OK]"[OK]⚠[OK]️[OK] [OK]C[OK]a[OK]r[OK]p[OK]e[OK]t[OK]a[OK] [OK]M[OK]I[OK]D[OK]I[OK] [OK]n[OK]o[OK] [OK]e[OK]n[OK]c[OK]o[OK]n[OK]t[OK]r[OK]a[OK]d[OK]a[OK]:[OK] [OK]{[OK]s[OK]e[OK]l[OK]f[OK].[OK]m[OK]i[OK]d[OK]i[OK]_[OK]f[OK]o[OK]l[OK]d[OK]e[OK]r[OK]}[OK]"[OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]r[OK]e[OK]t[OK]u[OK]r[OK]n[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]s[OK]e[OK]l[OK]f[OK].[OK]m[OK]i[OK]d[OK]i[OK]_[OK]f[OK]i[OK]l[OK]e[OK]s[OK] [OK]=[OK] [OK]l[OK]i[OK]s[OK]t[OK]([OK]s[OK]e[OK]l[OK]f[OK].[OK]m[OK]i[OK]d[OK]i[OK]_[OK]f[OK]o[OK]l[OK]d[OK]e[OK]r[OK].[OK]g[OK]l[OK]o[OK]b[OK]([OK]"[OK]*[OK].[OK]m[OK]i[OK]d[OK]"[OK])[OK])[OK] [OK]+[OK] [OK]\[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]l[OK]i[OK]s[OK]t[OK]([OK]s[OK]e[OK]l[OK]f[OK].[OK]m[OK]i[OK]d[OK]i[OK]_[OK]f[OK]o[OK]l[OK]d[OK]e[OK]r[OK].[OK]g[OK]l[OK]o[OK]b[OK]([OK]"[OK]*[OK].[OK]m[OK]i[OK]d[OK]i[OK]"[OK])[OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]s[OK]e[OK]l[OK]f[OK].[OK]m[OK]i[OK]d[OK]i[OK]_[OK]f[OK]i[OK]l[OK]e[OK]s[OK].[OK]s[OK]o[OK]r[OK]t[OK]([OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]i[OK]f[OK] [OK]s[OK]e[OK]l[OK]f[OK].[OK]m[OK]i[OK]d[OK]i[OK]_[OK]f[OK]i[OK]l[OK]e[OK]s[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]p[OK]r[OK]i[OK]n[OK]t[OK]([OK]f[OK]"[OK]✅[OK] [OK]{[OK]l[OK]e[OK]n[OK]([OK]s[OK]e[OK]l[OK]f[OK].[OK]m[OK]i[OK]d[OK]i[OK]_[OK]f[OK]i[OK]l[OK]e[OK]s[OK])[OK]}[OK] [OK]a[OK]r[OK]c[OK]h[OK]i[OK]v[OK]o[OK]s[OK] [OK]M[OK]I[OK]D[OK]I[OK] [OK]e[OK]n[OK]c[OK]o[OK]n[OK]t[OK]r[OK]a[OK]d[OK]o[OK]s[OK]"[OK])[OK]
+[OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK]d[OK]e[OK]f[OK] [OK]g[OK]e[OK]t[OK]_[OK]m[OK]i[OK]d[OK]i[OK]_[OK]f[OK]i[OK]l[OK]e[OK]s[OK]([OK]s[OK]e[OK]l[OK]f[OK])[OK] [OK]-[OK]>[OK] [OK]L[OK]i[OK]s[OK]t[OK][[OK]s[OK]t[OK]r[OK]][OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]"[OK]"[OK]"[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]R[OK]e[OK]t[OK]o[OK]r[OK]n[OK]a[OK] [OK]l[OK]i[OK]s[OK]t[OK]a[OK] [OK]d[OK]e[OK] [OK]n[OK]o[OK]m[OK]b[OK]r[OK]e[OK]s[OK] [OK]d[OK]e[OK] [OK]a[OK]r[OK]c[OK]h[OK]i[OK]v[OK]o[OK]s[OK] [OK]M[OK]I[OK]D[OK]I[OK] [OK]d[OK]i[OK]s[OK]p[OK]o[OK]n[OK]i[OK]b[OK]l[OK]e[OK]s[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]R[OK]e[OK]t[OK]u[OK]r[OK]n[OK]s[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]L[OK]i[OK]s[OK]t[OK][[OK]s[OK]t[OK]r[OK]][OK]:[OK] [OK]N[OK]o[OK]m[OK]b[OK]r[OK]e[OK]s[OK] [OK]d[OK]e[OK] [OK]l[OK]o[OK]s[OK] [OK]a[OK]r[OK]c[OK]h[OK]i[OK]v[OK]o[OK]s[OK] [OK]M[OK]I[OK]D[OK]I[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]"[OK]"[OK]"[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]r[OK]e[OK]t[OK]u[OK]r[OK]n[OK] [OK][[OK]f[OK].[OK]s[OK]t[OK]e[OK]m[OK] [OK]f[OK]o[OK]r[OK] [OK]f[OK] [OK]i[OK]n[OK] [OK]s[OK]e[OK]l[OK]f[OK].[OK]m[OK]i[OK]d[OK]i[OK]_[OK]f[OK]i[OK]l[OK]e[OK]s[OK]][OK]
+[OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK]d[OK]e[OK]f[OK] [OK]l[OK]o[OK]a[OK]d[OK]_[OK]m[OK]i[OK]d[OK]i[OK]([OK]s[OK]e[OK]l[OK]f[OK],[OK] [OK]f[OK]i[OK]l[OK]e[OK]n[OK]a[OK]m[OK]e[OK]:[OK] [OK]s[OK]t[OK]r[OK])[OK] [OK]-[OK]>[OK] [OK]O[OK]p[OK]t[OK]i[OK]o[OK]n[OK]a[OK]l[OK][[OK]p[OK]r[OK]e[OK]t[OK]t[OK]y[OK]_[OK]m[OK]i[OK]d[OK]i[OK].[OK]P[OK]r[OK]e[OK]t[OK]t[OK]y[OK]M[OK]I[OK]D[OK]I[OK]][OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]"[OK]"[OK]"[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]C[OK]a[OK]r[OK]g[OK]a[OK] [OK]u[OK]n[OK] [OK]a[OK]r[OK]c[OK]h[OK]i[OK]v[OK]o[OK] [OK]M[OK]I[OK]D[OK]I[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]A[OK]r[OK]g[OK]s[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]f[OK]i[OK]l[OK]e[OK]n[OK]a[OK]m[OK]e[OK] [OK]([OK]s[OK]t[OK]r[OK])[OK]:[OK] [OK]N[OK]o[OK]m[OK]b[OK]r[OK]e[OK] [OK]d[OK]e[OK]l[OK] [OK]a[OK]r[OK]c[OK]h[OK]i[OK]v[OK]o[OK] [OK]([OK]s[OK]i[OK]n[OK] [OK]e[OK]x[OK]t[OK]e[OK]n[OK]s[OK]i[OK]ó[OK]n[OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]R[OK]e[OK]t[OK]u[OK]r[OK]n[OK]s[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]p[OK]r[OK]e[OK]t[OK]t[OK]y[OK]_[OK]m[OK]i[OK]d[OK]i[OK].[OK]P[OK]r[OK]e[OK]t[OK]t[OK]y[OK]M[OK]I[OK]D[OK]I[OK]:[OK] [OK]O[OK]b[OK]j[OK]e[OK]t[OK]o[OK] [OK]M[OK]I[OK]D[OK]I[OK] [OK]o[OK] [OK]N[OK]o[OK]n[OK]e[OK] [OK]s[OK]i[OK] [OK]n[OK]o[OK] [OK]e[OK]x[OK]i[OK]s[OK]t[OK]e[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]"[OK]"[OK]"[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]#[OK] [OK]B[OK]u[OK]s[OK]c[OK]a[OK]r[OK] [OK]a[OK]r[OK]c[OK]h[OK]i[OK]v[OK]o[OK] [OK]c[OK]o[OK]n[OK] [OK]e[OK]x[OK]t[OK]e[OK]n[OK]s[OK]i[OK]ó[OK]n[OK] [OK].[OK]m[OK]i[OK]d[OK] [OK]o[OK] [OK].[OK]m[OK]i[OK]d[OK]i[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]m[OK]i[OK]d[OK]i[OK]_[OK]f[OK]i[OK]l[OK]e[OK] [OK]=[OK] [OK]s[OK]e[OK]l[OK]f[OK].[OK]m[OK]i[OK]d[OK]i[OK]_[OK]f[OK]o[OK]l[OK]d[OK]e[OK]r[OK] [OK]/[OK] [OK]f[OK]"[OK]{[OK]f[OK]i[OK]l[OK]e[OK]n[OK]a[OK]m[OK]e[OK]}[OK].[OK]m[OK]i[OK]d[OK]"[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]i[OK]f[OK] [OK]n[OK]o[OK]t[OK] [OK]m[OK]i[OK]d[OK]i[OK]_[OK]f[OK]i[OK]l[OK]e[OK].[OK]e[OK]x[OK]i[OK]s[OK]t[OK]s[OK]([OK])[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]m[OK]i[OK]d[OK]i[OK]_[OK]f[OK]i[OK]l[OK]e[OK] [OK]=[OK] [OK]s[OK]e[OK]l[OK]f[OK].[OK]m[OK]i[OK]d[OK]i[OK]_[OK]f[OK]o[OK]l[OK]d[OK]e[OK]r[OK] [OK]/[OK] [OK]f[OK]"[OK]{[OK]f[OK]i[OK]l[OK]e[OK]n[OK]a[OK]m[OK]e[OK]}[OK].[OK]m[OK]i[OK]d[OK]i[OK]"[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]i[OK]f[OK] [OK]n[OK]o[OK]t[OK] [OK]m[OK]i[OK]d[OK]i[OK]_[OK]f[OK]i[OK]l[OK]e[OK].[OK]e[OK]x[OK]i[OK]s[OK]t[OK]s[OK]([OK])[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]p[OK]r[OK]i[OK]n[OK]t[OK]([OK]f[OK]"[OK]❌[OK] [OK]A[OK]r[OK]c[OK]h[OK]i[OK]v[OK]o[OK] [OK]M[OK]I[OK]D[OK]I[OK] [OK]n[OK]o[OK] [OK]e[OK]n[OK]c[OK]o[OK]n[OK]t[OK]r[OK]a[OK]d[OK]o[OK]:[OK] [OK]{[OK]f[OK]i[OK]l[OK]e[OK]n[OK]a[OK]m[OK]e[OK]}[OK]"[OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]r[OK]e[OK]t[OK]u[OK]r[OK]n[OK] [OK]N[OK]o[OK]n[OK]e[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]t[OK]r[OK]y[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]m[OK]i[OK]d[OK]i[OK] [OK]=[OK] [OK]p[OK]r[OK]e[OK]t[OK]t[OK]y[OK]_[OK]m[OK]i[OK]d[OK]i[OK].[OK]P[OK]r[OK]e[OK]t[OK]t[OK]y[OK]M[OK]I[OK]D[OK]I[OK]([OK]s[OK]t[OK]r[OK]([OK]m[OK]i[OK]d[OK]i[OK]_[OK]f[OK]i[OK]l[OK]e[OK])[OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]p[OK]r[OK]i[OK]n[OK]t[OK]([OK]f[OK]"[OK]✅[OK] [OK]M[OK]I[OK]D[OK]I[OK] [OK]c[OK]a[OK]r[OK]g[OK]a[OK]d[OK]o[OK]:[OK] [OK]{[OK]f[OK]i[OK]l[OK]e[OK]n[OK]a[OK]m[OK]e[OK]}[OK]"[OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]r[OK]e[OK]t[OK]u[OK]r[OK]n[OK] [OK]m[OK]i[OK]d[OK]i[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]e[OK]x[OK]c[OK]e[OK]p[OK]t[OK] [OK]E[OK]x[OK]c[OK]e[OK]p[OK]t[OK]i[OK]o[OK]n[OK] [OK]a[OK]s[OK] [OK]e[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]p[OK]r[OK]i[OK]n[OK]t[OK]([OK]f[OK]"[OK]❌[OK] [OK]E[OK]r[OK]r[OK]o[OK]r[OK] [OK]a[OK]l[OK] [OK]c[OK]a[OK]r[OK]g[OK]a[OK]r[OK] [OK]M[OK]I[OK]D[OK]I[OK]:[OK] [OK]{[OK]e[OK]}[OK]"[OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]r[OK]e[OK]t[OK]u[OK]r[OK]n[OK] [OK]N[OK]o[OK]n[OK]e[OK]
+[OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK]d[OK]e[OK]f[OK] [OK]g[OK]e[OK]t[OK]_[OK]t[OK]r[OK]a[OK]c[OK]k[OK]_[OK]i[OK]n[OK]f[OK]o[OK]([OK]s[OK]e[OK]l[OK]f[OK],[OK] [OK]m[OK]i[OK]d[OK]i[OK]:[OK] [OK]p[OK]r[OK]e[OK]t[OK]t[OK]y[OK]_[OK]m[OK]i[OK]d[OK]i[OK].[OK]P[OK]r[OK]e[OK]t[OK]t[OK]y[OK]M[OK]I[OK]D[OK]I[OK])[OK] [OK]-[OK]>[OK] [OK]L[OK]i[OK]s[OK]t[OK][[OK]D[OK]i[OK]c[OK]t[OK]][OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]"[OK]"[OK]"[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]O[OK]b[OK]t[OK]i[OK]e[OK]n[OK]e[OK] [OK]i[OK]n[OK]f[OK]o[OK]r[OK]m[OK]a[OK]c[OK]i[OK]ó[OK]n[OK] [OK]d[OK]e[OK] [OK]t[OK]o[OK]d[OK]a[OK]s[OK] [OK]l[OK]a[OK]s[OK] [OK]p[OK]i[OK]s[OK]t[OK]a[OK]s[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]A[OK]r[OK]g[OK]s[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]m[OK]i[OK]d[OK]i[OK] [OK]([OK]p[OK]r[OK]e[OK]t[OK]t[OK]y[OK]_[OK]m[OK]i[OK]d[OK]i[OK].[OK]P[OK]r[OK]e[OK]t[OK]t[OK]y[OK]M[OK]I[OK]D[OK]I[OK])[OK]:[OK] [OK]O[OK]b[OK]j[OK]e[OK]t[OK]o[OK] [OK]M[OK]I[OK]D[OK]I[OK] [OK]c[OK]a[OK]r[OK]g[OK]a[OK]d[OK]o[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]R[OK]e[OK]t[OK]u[OK]r[OK]n[OK]s[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]L[OK]i[OK]s[OK]t[OK][[OK]D[OK]i[OK]c[OK]t[OK]][OK]:[OK] [OK]L[OK]i[OK]s[OK]t[OK]a[OK] [OK]c[OK]o[OK]n[OK] [OK]i[OK]n[OK]f[OK]o[OK] [OK]d[OK]e[OK] [OK]c[OK]a[OK]d[OK]a[OK] [OK]p[OK]i[OK]s[OK]t[OK]a[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]"[OK]"[OK]"[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]t[OK]r[OK]a[OK]c[OK]k[OK]s[OK]_[OK]i[OK]n[OK]f[OK]o[OK] [OK]=[OK] [OK][[OK]][OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]f[OK]o[OK]r[OK] [OK]i[OK]d[OK]x[OK],[OK] [OK]i[OK]n[OK]s[OK]t[OK]r[OK]u[OK]m[OK]e[OK]n[OK]t[OK] [OK]i[OK]n[OK] [OK]e[OK]n[OK]u[OK]m[OK]e[OK]r[OK]a[OK]t[OK]e[OK]([OK]m[OK]i[OK]d[OK]i[OK].[OK]i[OK]n[OK]s[OK]t[OK]r[OK]u[OK]m[OK]e[OK]n[OK]t[OK]s[OK])[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]i[OK]n[OK]f[OK]o[OK] [OK]=[OK] [OK]{[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]'[OK]i[OK]n[OK]d[OK]e[OK]x[OK]'[OK]:[OK] [OK]i[OK]d[OK]x[OK],[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]'[OK]n[OK]a[OK]m[OK]e[OK]'[OK]:[OK] [OK]i[OK]n[OK]s[OK]t[OK]r[OK]u[OK]m[OK]e[OK]n[OK]t[OK].[OK]n[OK]a[OK]m[OK]e[OK] [OK]o[OK]r[OK] [OK]f[OK]"[OK]P[OK]i[OK]s[OK]t[OK]a[OK] [OK]{[OK]i[OK]d[OK]x[OK]}[OK]"[OK],[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]'[OK]p[OK]r[OK]o[OK]g[OK]r[OK]a[OK]m[OK]'[OK]:[OK] [OK]i[OK]n[OK]s[OK]t[OK]r[OK]u[OK]m[OK]e[OK]n[OK]t[OK].[OK]p[OK]r[OK]o[OK]g[OK]r[OK]a[OK]m[OK],[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]'[OK]i[OK]s[OK]_[OK]d[OK]r[OK]u[OK]m[OK]'[OK]:[OK] [OK]i[OK]n[OK]s[OK]t[OK]r[OK]u[OK]m[OK]e[OK]n[OK]t[OK].[OK]i[OK]s[OK]_[OK]d[OK]r[OK]u[OK]m[OK],[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]'[OK]n[OK]o[OK]t[OK]e[OK]_[OK]c[OK]o[OK]u[OK]n[OK]t[OK]'[OK]:[OK] [OK]l[OK]e[OK]n[OK]([OK]i[OK]n[OK]s[OK]t[OK]r[OK]u[OK]m[OK]e[OK]n[OK]t[OK].[OK]n[OK]o[OK]t[OK]e[OK]s[OK])[OK],[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]'[OK]s[OK]t[OK]a[OK]r[OK]t[OK]_[OK]t[OK]i[OK]m[OK]e[OK]'[OK]:[OK] [OK]i[OK]n[OK]s[OK]t[OK]r[OK]u[OK]m[OK]e[OK]n[OK]t[OK].[OK]n[OK]o[OK]t[OK]e[OK]s[OK][[OK]0[OK]][OK].[OK]s[OK]t[OK]a[OK]r[OK]t[OK] [OK]i[OK]f[OK] [OK]i[OK]n[OK]s[OK]t[OK]r[OK]u[OK]m[OK]e[OK]n[OK]t[OK].[OK]n[OK]o[OK]t[OK]e[OK]s[OK] [OK]e[OK]l[OK]s[OK]e[OK] [OK]0[OK],[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]'[OK]e[OK]n[OK]d[OK]_[OK]t[OK]i[OK]m[OK]e[OK]'[OK]:[OK] [OK]i[OK]n[OK]s[OK]t[OK]r[OK]u[OK]m[OK]e[OK]n[OK]t[OK].[OK]n[OK]o[OK]t[OK]e[OK]s[OK][[OK]-[OK]1[OK]][OK].[OK]e[OK]n[OK]d[OK] [OK]i[OK]f[OK] [OK]i[OK]n[OK]s[OK]t[OK]r[OK]u[OK]m[OK]e[OK]n[OK]t[OK].[OK]n[OK]o[OK]t[OK]e[OK]s[OK] [OK]e[OK]l[OK]s[OK]e[OK] [OK]0[OK],[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]}[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]t[OK]r[OK]a[OK]c[OK]k[OK]s[OK]_[OK]i[OK]n[OK]f[OK]o[OK].[OK]a[OK]p[OK]p[OK]e[OK]n[OK]d[OK]([OK]i[OK]n[OK]f[OK]o[OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]r[OK]e[OK]t[OK]u[OK]r[OK]n[OK] [OK]t[OK]r[OK]a[OK]c[OK]k[OK]s[OK]_[OK]i[OK]n[OK]f[OK]o[OK]
+[OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK]d[OK]e[OK]f[OK] [OK]g[OK]e[OK]t[OK]_[OK]t[OK]r[OK]a[OK]c[OK]k[OK]_[OK]n[OK]o[OK]t[OK]e[OK]s[OK]([OK]s[OK]e[OK]l[OK]f[OK],[OK] [OK]m[OK]i[OK]d[OK]i[OK]:[OK] [OK]p[OK]r[OK]e[OK]t[OK]t[OK]y[OK]_[OK]m[OK]i[OK]d[OK]i[OK].[OK]P[OK]r[OK]e[OK]t[OK]t[OK]y[OK]M[OK]I[OK]D[OK]I[OK],[OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]t[OK]r[OK]a[OK]c[OK]k[OK]_[OK]i[OK]n[OK]d[OK]e[OK]x[OK]:[OK] [OK]i[OK]n[OK]t[OK] [OK]=[OK] [OK]0[OK])[OK] [OK]-[OK]>[OK] [OK]L[OK]i[OK]s[OK]t[OK][[OK]T[OK]u[OK]p[OK]l[OK]e[OK][[OK]i[OK]n[OK]t[OK],[OK] [OK]f[OK]l[OK]o[OK]a[OK]t[OK],[OK] [OK]f[OK]l[OK]o[OK]a[OK]t[OK]][OK]][OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]"[OK]"[OK]"[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]E[OK]x[OK]t[OK]r[OK]a[OK]e[OK] [OK]l[OK]a[OK]s[OK] [OK]n[OK]o[OK]t[OK]a[OK]s[OK] [OK]d[OK]e[OK] [OK]u[OK]n[OK]a[OK] [OK]p[OK]i[OK]s[OK]t[OK]a[OK] [OK]e[OK]s[OK]p[OK]e[OK]c[OK]í[OK]f[OK]i[OK]c[OK]a[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]A[OK]r[OK]g[OK]s[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]m[OK]i[OK]d[OK]i[OK] [OK]([OK]p[OK]r[OK]e[OK]t[OK]t[OK]y[OK]_[OK]m[OK]i[OK]d[OK]i[OK].[OK]P[OK]r[OK]e[OK]t[OK]t[OK]y[OK]M[OK]I[OK]D[OK]I[OK])[OK]:[OK] [OK]O[OK]b[OK]j[OK]e[OK]t[OK]o[OK] [OK]M[OK]I[OK]D[OK]I[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]t[OK]r[OK]a[OK]c[OK]k[OK]_[OK]i[OK]n[OK]d[OK]e[OK]x[OK] [OK]([OK]i[OK]n[OK]t[OK])[OK]:[OK] [OK]Í[OK]n[OK]d[OK]i[OK]c[OK]e[OK] [OK]d[OK]e[OK] [OK]l[OK]a[OK] [OK]p[OK]i[OK]s[OK]t[OK]a[OK] [OK]([OK]p[OK]o[OK]r[OK] [OK]d[OK]e[OK]f[OK]e[OK]c[OK]t[OK]o[OK] [OK]0[OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]R[OK]e[OK]t[OK]u[OK]r[OK]n[OK]s[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]L[OK]i[OK]s[OK]t[OK][[OK]T[OK]u[OK]p[OK]l[OK]e[OK][[OK]i[OK]n[OK]t[OK],[OK] [OK]f[OK]l[OK]o[OK]a[OK]t[OK],[OK] [OK]f[OK]l[OK]o[OK]a[OK]t[OK]][OK]][OK]:[OK] [OK]L[OK]i[OK]s[OK]t[OK]a[OK] [OK]d[OK]e[OK] [OK]([OK]p[OK]i[OK]t[OK]c[OK]h[OK],[OK] [OK]s[OK]t[OK]a[OK]r[OK]t[OK]_[OK]t[OK]i[OK]m[OK]e[OK],[OK] [OK]e[OK]n[OK]d[OK]_[OK]t[OK]i[OK]m[OK]e[OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]"[OK]"[OK]"[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]i[OK]f[OK] [OK]t[OK]r[OK]a[OK]c[OK]k[OK]_[OK]i[OK]n[OK]d[OK]e[OK]x[OK] [OK]>[OK]=[OK] [OK]l[OK]e[OK]n[OK]([OK]m[OK]i[OK]d[OK]i[OK].[OK]i[OK]n[OK]s[OK]t[OK]r[OK]u[OK]m[OK]e[OK]n[OK]t[OK]s[OK])[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]p[OK]r[OK]i[OK]n[OK]t[OK]([OK]f[OK]"[OK]❌[OK] [OK]P[OK]i[OK]s[OK]t[OK]a[OK] [OK]{[OK]t[OK]r[OK]a[OK]c[OK]k[OK]_[OK]i[OK]n[OK]d[OK]e[OK]x[OK]}[OK] [OK]n[OK]o[OK] [OK]e[OK]x[OK]i[OK]s[OK]t[OK]e[OK]"[OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]r[OK]e[OK]t[OK]u[OK]r[OK]n[OK] [OK][[OK]][OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]i[OK]n[OK]s[OK]t[OK]r[OK]u[OK]m[OK]e[OK]n[OK]t[OK] [OK]=[OK] [OK]m[OK]i[OK]d[OK]i[OK].[OK]i[OK]n[OK]s[OK]t[OK]r[OK]u[OK]m[OK]e[OK]n[OK]t[OK]s[OK][[OK]t[OK]r[OK]a[OK]c[OK]k[OK]_[OK]i[OK]n[OK]d[OK]e[OK]x[OK]][OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]n[OK]o[OK]t[OK]e[OK]s[OK] [OK]=[OK] [OK][[OK]][OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]f[OK]o[OK]r[OK] [OK]n[OK]o[OK]t[OK]e[OK] [OK]i[OK]n[OK] [OK]i[OK]n[OK]s[OK]t[OK]r[OK]u[OK]m[OK]e[OK]n[OK]t[OK].[OK]n[OK]o[OK]t[OK]e[OK]s[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]#[OK] [OK]F[OK]i[OK]l[OK]t[OK]r[OK]a[OK]r[OK] [OK]n[OK]o[OK]t[OK]a[OK]s[OK] [OK]d[OK]e[OK]n[OK]t[OK]r[OK]o[OK] [OK]d[OK]e[OK]l[OK] [OK]r[OK]a[OK]n[OK]g[OK]o[OK] [OK]d[OK]e[OK]l[OK] [OK]u[OK]k[OK]u[OK]l[OK]e[OK]l[OK]e[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]i[OK]f[OK] [OK]s[OK]e[OK]l[OK]f[OK].[OK]U[OK]K[OK]U[OK]L[OK]E[OK]L[OK]E[OK]_[OK]M[OK]I[OK]N[OK]_[OK]N[OK]O[OK]T[OK]E[OK] [OK]<[OK]=[OK] [OK]n[OK]o[OK]t[OK]e[OK].[OK]p[OK]i[OK]t[OK]c[OK]h[OK] [OK]<[OK]=[OK] [OK]s[OK]e[OK]l[OK]f[OK].[OK]U[OK]K[OK]U[OK]L[OK]E[OK]L[OK]E[OK]_[OK]M[OK]A[OK]X[OK]_[OK]N[OK]O[OK]T[OK]E[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]n[OK]o[OK]t[OK]e[OK]s[OK].[OK]a[OK]p[OK]p[OK]e[OK]n[OK]d[OK]([OK]([OK]n[OK]o[OK]t[OK]e[OK].[OK]p[OK]i[OK]t[OK]c[OK]h[OK],[OK] [OK]n[OK]o[OK]t[OK]e[OK].[OK]s[OK]t[OK]a[OK]r[OK]t[OK],[OK] [OK]n[OK]o[OK]t[OK]e[OK].[OK]e[OK]n[OK]d[OK])[OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]#[OK] [OK]O[OK]r[OK]d[OK]e[OK]n[OK]a[OK]r[OK] [OK]p[OK]o[OK]r[OK] [OK]t[OK]i[OK]e[OK]m[OK]p[OK]o[OK] [OK]d[OK]e[OK] [OK]i[OK]n[OK]i[OK]c[OK]i[OK]o[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]n[OK]o[OK]t[OK]e[OK]s[OK].[OK]s[OK]o[OK]r[OK]t[OK]([OK]k[OK]e[OK]y[OK]=[OK]l[OK]a[OK]m[OK]b[OK]d[OK]a[OK] [OK]x[OK]:[OK] [OK]x[OK][[OK]1[OK]][OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]r[OK]e[OK]t[OK]u[OK]r[OK]n[OK] [OK]n[OK]o[OK]t[OK]e[OK]s[OK]
+[OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK]@[OK]s[OK]t[OK]a[OK]t[OK]i[OK]c[OK]m[OK]e[OK]t[OK]h[OK]o[OK]d[OK]
+[OK] [OK] [OK] [OK] [OK]d[OK]e[OK]f[OK] [OK]m[OK]i[OK]d[OK]i[OK]_[OK]n[OK]o[OK]t[OK]e[OK]_[OK]t[OK]o[OK]_[OK]n[OK]a[OK]m[OK]e[OK]([OK]p[OK]i[OK]t[OK]c[OK]h[OK]:[OK] [OK]i[OK]n[OK]t[OK])[OK] [OK]-[OK]>[OK] [OK]s[OK]t[OK]r[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]"[OK]"[OK]"[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]C[OK]o[OK]n[OK]v[OK]i[OK]e[OK]r[OK]t[OK]e[OK] [OK]n[OK]ú[OK]m[OK]e[OK]r[OK]o[OK] [OK]M[OK]I[OK]D[OK]I[OK] [OK]a[OK] [OK]n[OK]o[OK]m[OK]b[OK]r[OK]e[OK] [OK]d[OK]e[OK] [OK]n[OK]o[OK]t[OK]a[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]A[OK]r[OK]g[OK]s[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]p[OK]i[OK]t[OK]c[OK]h[OK] [OK]([OK]i[OK]n[OK]t[OK])[OK]:[OK] [OK]N[OK]ú[OK]m[OK]e[OK]r[OK]o[OK] [OK]M[OK]I[OK]D[OK]I[OK] [OK]([OK]0[OK]-[OK]1[OK]2[OK]7[OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]R[OK]e[OK]t[OK]u[OK]r[OK]n[OK]s[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]s[OK]t[OK]r[OK]:[OK] [OK]N[OK]o[OK]m[OK]b[OK]r[OK]e[OK] [OK]d[OK]e[OK] [OK]l[OK]a[OK] [OK]n[OK]o[OK]t[OK]a[OK] [OK]([OK]e[OK]j[OK]:[OK] [OK]"[OK]C[OK]4[OK]"[OK],[OK] [OK]"[OK]D[OK]#[OK]5[OK]"[OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]"[OK]"[OK]"[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]n[OK]o[OK]t[OK]e[OK]_[OK]n[OK]a[OK]m[OK]e[OK]s[OK] [OK]=[OK] [OK][[OK]'[OK]C[OK]'[OK],[OK] [OK]'[OK]C[OK]#[OK]'[OK],[OK] [OK]'[OK]D[OK]'[OK],[OK] [OK]'[OK]D[OK]#[OK]'[OK],[OK] [OK]'[OK]E[OK]'[OK],[OK] [OK]'[OK]F[OK]'[OK],[OK] [OK]'[OK]F[OK]#[OK]'[OK],[OK] [OK]'[OK]G[OK]'[OK],[OK] [OK]'[OK]G[OK]#[OK]'[OK],[OK] [OK]'[OK]A[OK]'[OK],[OK] [OK]'[OK]A[OK]#[OK]'[OK],[OK] [OK]'[OK]B[OK]'[OK]][OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]o[OK]c[OK]t[OK]a[OK]v[OK]e[OK] [OK]=[OK] [OK]([OK]p[OK]i[OK]t[OK]c[OK]h[OK] [OK]/[OK]/[OK] [OK]1[OK]2[OK])[OK] [OK]-[OK] [OK]1[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]n[OK]o[OK]t[OK]e[OK]_[OK]i[OK]n[OK]d[OK]e[OK]x[OK] [OK]=[OK] [OK]p[OK]i[OK]t[OK]c[OK]h[OK] [OK]%[OK] [OK]1[OK]2[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]r[OK]e[OK]t[OK]u[OK]r[OK]n[OK] [OK]f[OK]"[OK]{[OK]n[OK]o[OK]t[OK]e[OK]_[OK]n[OK]a[OK]m[OK]e[OK]s[OK][[OK]n[OK]o[OK]t[OK]e[OK]_[OK]i[OK]n[OK]d[OK]e[OK]x[OK]][OK]}[OK]{[OK]o[OK]c[OK]t[OK]a[OK]v[OK]e[OK]}[OK]"[OK]
+[OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK]@[OK]s[OK]t[OK]a[OK]t[OK]i[OK]c[OK]m[OK]e[OK]t[OK]h[OK]o[OK]d[OK]
+[OK] [OK] [OK] [OK] [OK]d[OK]e[OK]f[OK] [OK]m[OK]i[OK]d[OK]i[OK]_[OK]n[OK]o[OK]t[OK]e[OK]_[OK]t[OK]o[OK]_[OK]f[OK]r[OK]e[OK]q[OK]u[OK]e[OK]n[OK]c[OK]y[OK]([OK]p[OK]i[OK]t[OK]c[OK]h[OK]:[OK] [OK]i[OK]n[OK]t[OK])[OK] [OK]-[OK]>[OK] [OK]f[OK]l[OK]o[OK]a[OK]t[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]"[OK]"[OK]"[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]C[OK]o[OK]n[OK]v[OK]i[OK]e[OK]r[OK]t[OK]e[OK] [OK]n[OK]ú[OK]m[OK]e[OK]r[OK]o[OK] [OK]M[OK]I[OK]D[OK]I[OK] [OK]a[OK] [OK]f[OK]r[OK]e[OK]c[OK]u[OK]e[OK]n[OK]c[OK]i[OK]a[OK] [OK]e[OK]n[OK] [OK]H[OK]z[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]A[OK]r[OK]g[OK]s[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]p[OK]i[OK]t[OK]c[OK]h[OK] [OK]([OK]i[OK]n[OK]t[OK])[OK]:[OK] [OK]N[OK]ú[OK]m[OK]e[OK]r[OK]o[OK] [OK]M[OK]I[OK]D[OK]I[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]R[OK]e[OK]t[OK]u[OK]r[OK]n[OK]s[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]f[OK]l[OK]o[OK]a[OK]t[OK]:[OK] [OK]F[OK]r[OK]e[OK]c[OK]u[OK]e[OK]n[OK]c[OK]i[OK]a[OK] [OK]e[OK]n[OK] [OK]H[OK]z[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]"[OK]"[OK]"[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]#[OK] [OK]A[OK]4[OK] [OK]([OK]p[OK]i[OK]t[OK]c[OK]h[OK] [OK]6[OK]9[OK])[OK] [OK]=[OK] [OK]4[OK]4[OK]0[OK] [OK]H[OK]z[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]r[OK]e[OK]t[OK]u[OK]r[OK]n[OK] [OK]4[OK]4[OK]0[OK] [OK]*[OK] [OK]([OK]2[OK] [OK]*[OK]*[OK] [OK]([OK]([OK]p[OK]i[OK]t[OK]c[OK]h[OK] [OK]-[OK] [OK]6[OK]9[OK])[OK] [OK]/[OK] [OK]1[OK]2[OK])[OK])[OK]
+[OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK]d[OK]e[OK]f[OK] [OK]t[OK]r[OK]a[OK]n[OK]s[OK]p[OK]o[OK]s[OK]e[OK]_[OK]n[OK]o[OK]t[OK]e[OK]s[OK]([OK]s[OK]e[OK]l[OK]f[OK],[OK] [OK]n[OK]o[OK]t[OK]e[OK]s[OK]:[OK] [OK]L[OK]i[OK]s[OK]t[OK][[OK]T[OK]u[OK]p[OK]l[OK]e[OK][[OK]i[OK]n[OK]t[OK],[OK] [OK]f[OK]l[OK]o[OK]a[OK]t[OK],[OK] [OK]f[OK]l[OK]o[OK]a[OK]t[OK]][OK]][OK],[OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]o[OK]c[OK]t[OK]a[OK]v[OK]e[OK]s[OK]:[OK] [OK]i[OK]n[OK]t[OK] [OK]=[OK] [OK]0[OK])[OK] [OK]-[OK]>[OK] [OK]L[OK]i[OK]s[OK]t[OK][[OK]T[OK]u[OK]p[OK]l[OK]e[OK][[OK]i[OK]n[OK]t[OK],[OK] [OK]f[OK]l[OK]o[OK]a[OK]t[OK],[OK] [OK]f[OK]l[OK]o[OK]a[OK]t[OK]][OK]][OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]"[OK]"[OK]"[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]T[OK]r[OK]a[OK]n[OK]s[OK]p[OK]o[OK]n[OK]e[OK] [OK]n[OK]o[OK]t[OK]a[OK]s[OK] [OK]p[OK]o[OK]r[OK] [OK]o[OK]c[OK]t[OK]a[OK]v[OK]a[OK]s[OK] [OK]c[OK]o[OK]m[OK]p[OK]l[OK]e[OK]t[OK]a[OK]s[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]A[OK]r[OK]g[OK]s[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]n[OK]o[OK]t[OK]e[OK]s[OK] [OK]([OK]L[OK]i[OK]s[OK]t[OK][[OK]T[OK]u[OK]p[OK]l[OK]e[OK][[OK]i[OK]n[OK]t[OK],[OK] [OK]f[OK]l[OK]o[OK]a[OK]t[OK],[OK] [OK]f[OK]l[OK]o[OK]a[OK]t[OK]][OK]][OK])[OK]:[OK] [OK]L[OK]i[OK]s[OK]t[OK]a[OK] [OK]d[OK]e[OK] [OK]([OK]p[OK]i[OK]t[OK]c[OK]h[OK],[OK] [OK]s[OK]t[OK]a[OK]r[OK]t[OK]_[OK]t[OK]i[OK]m[OK]e[OK],[OK] [OK]e[OK]n[OK]d[OK]_[OK]t[OK]i[OK]m[OK]e[OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]o[OK]c[OK]t[OK]a[OK]v[OK]e[OK]s[OK] [OK]([OK]i[OK]n[OK]t[OK])[OK]:[OK] [OK]N[OK]ú[OK]m[OK]e[OK]r[OK]o[OK] [OK]d[OK]e[OK] [OK]o[OK]c[OK]t[OK]a[OK]v[OK]a[OK]s[OK] [OK]a[OK] [OK]t[OK]r[OK]a[OK]n[OK]s[OK]p[OK]o[OK]n[OK]e[OK]r[OK] [OK]([OK]+[OK]/[OK]-[OK] [OK]1[OK]2[OK] [OK]s[OK]e[OK]m[OK]i[OK]t[OK]o[OK]n[OK]e[OK]s[OK] [OK]p[OK]o[OK]r[OK] [OK]o[OK]c[OK]t[OK]a[OK]v[OK]a[OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]R[OK]e[OK]t[OK]u[OK]r[OK]n[OK]s[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]L[OK]i[OK]s[OK]t[OK][[OK]T[OK]u[OK]p[OK]l[OK]e[OK][[OK]i[OK]n[OK]t[OK],[OK] [OK]f[OK]l[OK]o[OK]a[OK]t[OK],[OK] [OK]f[OK]l[OK]o[OK]a[OK]t[OK]][OK]][OK]:[OK] [OK]N[OK]o[OK]t[OK]a[OK]s[OK] [OK]t[OK]r[OK]a[OK]n[OK]s[OK]p[OK]o[OK]n[OK]i[OK]d[OK]a[OK]s[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]"[OK]"[OK]"[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]s[OK]e[OK]m[OK]i[OK]t[OK]o[OK]n[OK]e[OK]s[OK] [OK]=[OK] [OK]o[OK]c[OK]t[OK]a[OK]v[OK]e[OK]s[OK] [OK]*[OK] [OK]1[OK]2[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]t[OK]r[OK]a[OK]n[OK]s[OK]p[OK]o[OK]s[OK]e[OK]d[OK] [OK]=[OK] [OK][[OK]][OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]f[OK]o[OK]r[OK] [OK]p[OK]i[OK]t[OK]c[OK]h[OK],[OK] [OK]s[OK]t[OK]a[OK]r[OK]t[OK],[OK] [OK]e[OK]n[OK]d[OK] [OK]i[OK]n[OK] [OK]n[OK]o[OK]t[OK]e[OK]s[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]n[OK]e[OK]w[OK]_[OK]p[OK]i[OK]t[OK]c[OK]h[OK] [OK]=[OK] [OK]p[OK]i[OK]t[OK]c[OK]h[OK] [OK]+[OK] [OK]s[OK]e[OK]m[OK]i[OK]t[OK]o[OK]n[OK]e[OK]s[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]#[OK] [OK]A[OK]s[OK]e[OK]g[OK]u[OK]r[OK]a[OK]r[OK] [OK]q[OK]u[OK]e[OK] [OK]e[OK]s[OK]t[OK]é[OK] [OK]d[OK]e[OK]n[OK]t[OK]r[OK]o[OK] [OK]d[OK]e[OK]l[OK] [OK]r[OK]a[OK]n[OK]g[OK]o[OK] [OK]M[OK]I[OK]D[OK]I[OK] [OK]v[OK]á[OK]l[OK]i[OK]d[OK]o[OK] [OK]([OK]0[OK]-[OK]1[OK]2[OK]7[OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]n[OK]e[OK]w[OK]_[OK]p[OK]i[OK]t[OK]c[OK]h[OK] [OK]=[OK] [OK]m[OK]a[OK]x[OK]([OK]0[OK],[OK] [OK]m[OK]i[OK]n[OK]([OK]1[OK]2[OK]7[OK],[OK] [OK]n[OK]e[OK]w[OK]_[OK]p[OK]i[OK]t[OK]c[OK]h[OK])[OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]t[OK]r[OK]a[OK]n[OK]s[OK]p[OK]o[OK]s[OK]e[OK]d[OK].[OK]a[OK]p[OK]p[OK]e[OK]n[OK]d[OK]([OK]([OK]n[OK]e[OK]w[OK]_[OK]p[OK]i[OK]t[OK]c[OK]h[OK],[OK] [OK]s[OK]t[OK]a[OK]r[OK]t[OK],[OK] [OK]e[OK]n[OK]d[OK])[OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]r[OK]e[OK]t[OK]u[OK]r[OK]n[OK] [OK]t[OK]r[OK]a[OK]n[OK]s[OK]p[OK]o[OK]s[OK]e[OK]d[OK]
+[OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK]d[OK]e[OK]f[OK] [OK]g[OK]e[OK]t[OK]_[OK]n[OK]o[OK]t[OK]e[OK]s[OK]_[OK]r[OK]a[OK]n[OK]g[OK]e[OK]([OK]s[OK]e[OK]l[OK]f[OK],[OK] [OK]n[OK]o[OK]t[OK]e[OK]s[OK]:[OK] [OK]L[OK]i[OK]s[OK]t[OK][[OK]T[OK]u[OK]p[OK]l[OK]e[OK][[OK]i[OK]n[OK]t[OK],[OK] [OK]f[OK]l[OK]o[OK]a[OK]t[OK],[OK] [OK]f[OK]l[OK]o[OK]a[OK]t[OK]][OK]][OK])[OK] [OK]-[OK]>[OK] [OK]T[OK]u[OK]p[OK]l[OK]e[OK][[OK]i[OK]n[OK]t[OK],[OK] [OK]i[OK]n[OK]t[OK]][OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]"[OK]"[OK]"[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]O[OK]b[OK]t[OK]i[OK]e[OK]n[OK]e[OK] [OK]e[OK]l[OK] [OK]r[OK]a[OK]n[OK]g[OK]o[OK] [OK]([OK]m[OK]i[OK]n[OK],[OK] [OK]m[OK]a[OK]x[OK])[OK] [OK]d[OK]e[OK] [OK]n[OK]o[OK]t[OK]a[OK]s[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]A[OK]r[OK]g[OK]s[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]n[OK]o[OK]t[OK]e[OK]s[OK] [OK]([OK]L[OK]i[OK]s[OK]t[OK][[OK]T[OK]u[OK]p[OK]l[OK]e[OK][[OK]i[OK]n[OK]t[OK],[OK] [OK]f[OK]l[OK]o[OK]a[OK]t[OK],[OK] [OK]f[OK]l[OK]o[OK]a[OK]t[OK]][OK]][OK])[OK]:[OK] [OK]L[OK]i[OK]s[OK]t[OK]a[OK] [OK]d[OK]e[OK] [OK]([OK]p[OK]i[OK]t[OK]c[OK]h[OK],[OK] [OK]s[OK]t[OK]a[OK]r[OK]t[OK]_[OK]t[OK]i[OK]m[OK]e[OK],[OK] [OK]e[OK]n[OK]d[OK]_[OK]t[OK]i[OK]m[OK]e[OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]R[OK]e[OK]t[OK]u[OK]r[OK]n[OK]s[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]T[OK]u[OK]p[OK]l[OK]e[OK][[OK]i[OK]n[OK]t[OK],[OK] [OK]i[OK]n[OK]t[OK]][OK]:[OK] [OK]([OK]n[OK]o[OK]t[OK]a[OK]_[OK]m[OK]í[OK]n[OK]i[OK]m[OK]a[OK],[OK] [OK]n[OK]o[OK]t[OK]a[OK]_[OK]m[OK]á[OK]x[OK]i[OK]m[OK]a[OK])[OK] [OK]e[OK]n[OK] [OK]M[OK]I[OK]D[OK]I[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]"[OK]"[OK]"[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]i[OK]f[OK] [OK]n[OK]o[OK]t[OK] [OK]n[OK]o[OK]t[OK]e[OK]s[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]r[OK]e[OK]t[OK]u[OK]r[OK]n[OK] [OK]([OK]0[OK],[OK] [OK]0[OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]p[OK]i[OK]t[OK]c[OK]h[OK]e[OK]s[OK] [OK]=[OK] [OK][[OK]p[OK]i[OK]t[OK]c[OK]h[OK] [OK]f[OK]o[OK]r[OK] [OK]p[OK]i[OK]t[OK]c[OK]h[OK],[OK] [OK]_[OK],[OK] [OK]_[OK] [OK]i[OK]n[OK] [OK]n[OK]o[OK]t[OK]e[OK]s[OK]][OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]r[OK]e[OK]t[OK]u[OK]r[OK]n[OK] [OK]([OK]m[OK]i[OK]n[OK]([OK]p[OK]i[OK]t[OK]c[OK]h[OK]e[OK]s[OK])[OK],[OK] [OK]m[OK]a[OK]x[OK]([OK]p[OK]i[OK]t[OK]c[OK]h[OK]e[OK]s[OK])[OK])[OK]
+[OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK]d[OK]e[OK]f[OK] [OK]a[OK]d[OK]j[OK]u[OK]s[OK]t[OK]_[OK]t[OK]o[OK]_[OK]u[OK]k[OK]u[OK]l[OK]e[OK]l[OK]e[OK]_[OK]r[OK]a[OK]n[OK]g[OK]e[OK]([OK]s[OK]e[OK]l[OK]f[OK],[OK] [OK]n[OK]o[OK]t[OK]e[OK]s[OK]:[OK] [OK]L[OK]i[OK]s[OK]t[OK][[OK]T[OK]u[OK]p[OK]l[OK]e[OK][[OK]i[OK]n[OK]t[OK],[OK] [OK]f[OK]l[OK]o[OK]a[OK]t[OK],[OK] [OK]f[OK]l[OK]o[OK]a[OK]t[OK]][OK]][OK])[OK] [OK]-[OK]>[OK] [OK]T[OK]u[OK]p[OK]l[OK]e[OK][[OK]L[OK]i[OK]s[OK]t[OK][[OK]T[OK]u[OK]p[OK]l[OK]e[OK][[OK]i[OK]n[OK]t[OK],[OK] [OK]f[OK]l[OK]o[OK]a[OK]t[OK],[OK] [OK]f[OK]l[OK]o[OK]a[OK]t[OK]][OK]][OK],[OK] [OK]i[OK]n[OK]t[OK]][OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]"[OK]"[OK]"[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]A[OK]j[OK]u[OK]s[OK]t[OK]a[OK] [OK]a[OK]u[OK]t[OK]o[OK]m[OK]á[OK]t[OK]i[OK]c[OK]a[OK]m[OK]e[OK]n[OK]t[OK]e[OK] [OK]n[OK]o[OK]t[OK]a[OK]s[OK] [OK]a[OK]l[OK] [OK]r[OK]a[OK]n[OK]g[OK]o[OK] [OK]d[OK]e[OK]l[OK] [OK]u[OK]k[OK]u[OK]l[OK]e[OK]l[OK]e[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]A[OK]r[OK]g[OK]s[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]n[OK]o[OK]t[OK]e[OK]s[OK] [OK]([OK]L[OK]i[OK]s[OK]t[OK][[OK]T[OK]u[OK]p[OK]l[OK]e[OK][[OK]i[OK]n[OK]t[OK],[OK] [OK]f[OK]l[OK]o[OK]a[OK]t[OK],[OK] [OK]f[OK]l[OK]o[OK]a[OK]t[OK]][OK]][OK])[OK]:[OK] [OK]L[OK]i[OK]s[OK]t[OK]a[OK] [OK]d[OK]e[OK] [OK]([OK]p[OK]i[OK]t[OK]c[OK]h[OK],[OK] [OK]s[OK]t[OK]a[OK]r[OK]t[OK]_[OK]t[OK]i[OK]m[OK]e[OK],[OK] [OK]e[OK]n[OK]d[OK]_[OK]t[OK]i[OK]m[OK]e[OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]R[OK]e[OK]t[OK]u[OK]r[OK]n[OK]s[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]T[OK]u[OK]p[OK]l[OK]e[OK]:[OK] [OK]([OK]n[OK]o[OK]t[OK]a[OK]s[OK]_[OK]a[OK]j[OK]u[OK]s[OK]t[OK]a[OK]d[OK]a[OK]s[OK],[OK] [OK]o[OK]c[OK]t[OK]a[OK]v[OK]a[OK]s[OK]_[OK]t[OK]r[OK]a[OK]n[OK]s[OK]p[OK]o[OK]n[OK]i[OK]d[OK]a[OK]s[OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]"[OK]"[OK]"[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]m[OK]i[OK]n[OK]_[OK]n[OK]o[OK]t[OK]e[OK],[OK] [OK]m[OK]a[OK]x[OK]_[OK]n[OK]o[OK]t[OK]e[OK] [OK]=[OK] [OK]s[OK]e[OK]l[OK]f[OK].[OK]g[OK]e[OK]t[OK]_[OK]n[OK]o[OK]t[OK]e[OK]s[OK]_[OK]r[OK]a[OK]n[OK]g[OK]e[OK]([OK]n[OK]o[OK]t[OK]e[OK]s[OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]#[OK] [OK]R[OK]a[OK]n[OK]g[OK]o[OK] [OK]t[OK]í[OK]p[OK]i[OK]c[OK]o[OK] [OK]d[OK]e[OK]l[OK] [OK]u[OK]k[OK]u[OK]l[OK]e[OK]l[OK]e[OK] [OK]s[OK]o[OK]p[OK]r[OK]a[OK]n[OK]o[OK]:[OK] [OK]C[OK]4[OK] [OK]([OK]6[OK]0[OK])[OK] [OK]a[OK] [OK]E[OK]6[OK] [OK]([OK]8[OK]8[OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]u[OK]k[OK]e[OK]_[OK]m[OK]i[OK]n[OK] [OK]=[OK] [OK]6[OK]0[OK] [OK] [OK]#[OK] [OK]C[OK]4[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]u[OK]k[OK]e[OK]_[OK]m[OK]a[OK]x[OK] [OK]=[OK] [OK]8[OK]8[OK] [OK] [OK]#[OK] [OK]E[OK]6[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]o[OK]c[OK]t[OK]a[OK]v[OK]e[OK]s[OK]_[OK]n[OK]e[OK]e[OK]d[OK]e[OK]d[OK] [OK]=[OK] [OK]0[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]a[OK]d[OK]j[OK]u[OK]s[OK]t[OK]e[OK]d[OK]_[OK]n[OK]o[OK]t[OK]e[OK]s[OK] [OK]=[OK] [OK]n[OK]o[OK]t[OK]e[OK]s[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]#[OK] [OK]S[OK]i[OK] [OK]l[OK]a[OK]s[OK] [OK]n[OK]o[OK]t[OK]a[OK]s[OK] [OK]e[OK]s[OK]t[OK]á[OK]n[OK] [OK]t[OK]o[OK]d[OK]a[OK]s[OK] [OK]d[OK]e[OK]m[OK]a[OK]s[OK]i[OK]a[OK]d[OK]o[OK] [OK]b[OK]a[OK]j[OK]a[OK]s[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]i[OK]f[OK] [OK]m[OK]a[OK]x[OK]_[OK]n[OK]o[OK]t[OK]e[OK] [OK]<[OK] [OK]u[OK]k[OK]e[OK]_[OK]m[OK]i[OK]n[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]w[OK]h[OK]i[OK]l[OK]e[OK] [OK]m[OK]a[OK]x[OK]([OK]p[OK]i[OK]t[OK]c[OK]h[OK] [OK]f[OK]o[OK]r[OK] [OK]p[OK]i[OK]t[OK]c[OK]h[OK],[OK] [OK]_[OK],[OK] [OK]_[OK] [OK]i[OK]n[OK] [OK]a[OK]d[OK]j[OK]u[OK]s[OK]t[OK]e[OK]d[OK]_[OK]n[OK]o[OK]t[OK]e[OK]s[OK])[OK] [OK]<[OK] [OK]u[OK]k[OK]e[OK]_[OK]m[OK]i[OK]n[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]o[OK]c[OK]t[OK]a[OK]v[OK]e[OK]s[OK]_[OK]n[OK]e[OK]e[OK]d[OK]e[OK]d[OK] [OK]+[OK]=[OK] [OK]1[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]a[OK]d[OK]j[OK]u[OK]s[OK]t[OK]e[OK]d[OK]_[OK]n[OK]o[OK]t[OK]e[OK]s[OK] [OK]=[OK] [OK]s[OK]e[OK]l[OK]f[OK].[OK]t[OK]r[OK]a[OK]n[OK]s[OK]p[OK]o[OK]s[OK]e[OK]_[OK]n[OK]o[OK]t[OK]e[OK]s[OK]([OK]a[OK]d[OK]j[OK]u[OK]s[OK]t[OK]e[OK]d[OK]_[OK]n[OK]o[OK]t[OK]e[OK]s[OK],[OK] [OK]1[OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]#[OK] [OK]S[OK]i[OK] [OK]l[OK]a[OK]s[OK] [OK]n[OK]o[OK]t[OK]a[OK]s[OK] [OK]e[OK]s[OK]t[OK]á[OK]n[OK] [OK]t[OK]o[OK]d[OK]a[OK]s[OK] [OK]d[OK]e[OK]m[OK]a[OK]s[OK]i[OK]a[OK]d[OK]o[OK] [OK]a[OK]l[OK]t[OK]a[OK]s[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]e[OK]l[OK]i[OK]f[OK] [OK]m[OK]i[OK]n[OK]_[OK]n[OK]o[OK]t[OK]e[OK] [OK]>[OK] [OK]u[OK]k[OK]e[OK]_[OK]m[OK]a[OK]x[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]w[OK]h[OK]i[OK]l[OK]e[OK] [OK]m[OK]i[OK]n[OK]([OK]p[OK]i[OK]t[OK]c[OK]h[OK] [OK]f[OK]o[OK]r[OK] [OK]p[OK]i[OK]t[OK]c[OK]h[OK],[OK] [OK]_[OK],[OK] [OK]_[OK] [OK]i[OK]n[OK] [OK]a[OK]d[OK]j[OK]u[OK]s[OK]t[OK]e[OK]d[OK]_[OK]n[OK]o[OK]t[OK]e[OK]s[OK])[OK] [OK]>[OK] [OK]u[OK]k[OK]e[OK]_[OK]m[OK]a[OK]x[OK]:[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]o[OK]c[OK]t[OK]a[OK]v[OK]e[OK]s[OK]_[OK]n[OK]e[OK]e[OK]d[OK]e[OK]d[OK] [OK]-[OK]=[OK] [OK]1[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]a[OK]d[OK]j[OK]u[OK]s[OK]t[OK]e[OK]d[OK]_[OK]n[OK]o[OK]t[OK]e[OK]s[OK] [OK]=[OK] [OK]s[OK]e[OK]l[OK]f[OK].[OK]t[OK]r[OK]a[OK]n[OK]s[OK]p[OK]o[OK]s[OK]e[OK]_[OK]n[OK]o[OK]t[OK]e[OK]s[OK]([OK]a[OK]d[OK]j[OK]u[OK]s[OK]t[OK]e[OK]d[OK]_[OK]n[OK]o[OK]t[OK]e[OK]s[OK],[OK] [OK]-[OK]1[OK])[OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]
+[OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK] [OK]r[OK]e[OK]t[OK]u[OK]r[OK]n[OK] [OK]a[OK]d[OK]j[OK]u[OK]s[OK]t[OK]e[OK]d[OK]_[OK]n[OK]o[OK]t[OK]e[OK]s[OK],[OK] [OK]o[OK]c[OK]t[OK]a[OK]v[OK]e[OK]s[OK]_[OK]n[OK]e[OK]e[OK]d[OK]e[OK]d[OK]
+[OK]

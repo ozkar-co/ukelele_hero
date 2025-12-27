@@ -69,7 +69,7 @@ class MainMenu:
     def draw(self, screen):
         """Dibujar el menú"""
         # Título del juego
-        title_text = self.font_large.render("🎵 UKULELE MASTER 🎵", True, HIGHLIGHT_COLOR)
+        title_text = self.font_large.render("UKULELE MASTER", True, HIGHLIGHT_COLOR)
         title_rect = title_text.get_rect(center=(WINDOW_WIDTH // 2, 150))
         screen.blit(title_text, title_rect)
         

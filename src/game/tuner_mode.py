@@ -115,13 +115,13 @@ class TunerMode:
         self.screen.fill(BACKGROUND_COLOR)
         
         # Título
-        title_text = self.font_large.render("🎵 DETECTOR DE NOTAS 🎵", True, HIGHLIGHT_COLOR)
+        title_text = self.font_large.render("DETECTOR DE NOTAS", True, HIGHLIGHT_COLOR)
         title_rect = title_text.get_rect(center=(WINDOW_WIDTH // 2, 80))
         self.screen.blit(title_text, title_rect)
         
         # Estado de detección
         status_color = SUCCESS_COLOR if self.note_detector.is_detecting else ERROR_COLOR
-        status_text = "🎤 DETECTANDO" if self.note_detector.is_detecting else "🎤 PAUSADO"
+        status_text = "[DETECTANDO]" if self.note_detector.is_detecting else "[PAUSADO]"
         status_surface = self.font_medium.render(status_text, True, status_color)
         status_rect = status_surface.get_rect(center=(WINDOW_WIDTH // 2, 120))
         self.screen.blit(status_surface, status_rect)

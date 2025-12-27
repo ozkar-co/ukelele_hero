@@ -14,20 +14,20 @@ PROJECT_DESCRIPTION = __description__
 # Estado del desarrollo
 DEVELOPMENT_STAGE = "Etapa 1: Afinador"
 FEATURES_COMPLETED = [
-    "✅ Sistema de captura de audio desde micrófono",
-    "✅ Análisis de frecuencia usando FFT",
-    "✅ Detección de notas musicales",
-    "✅ Interfaz gráfica del afinador",
-    "✅ Visualización de estado de afinación",
-    "✅ Tests unitarios básicos"
+    "[OK] Sistema de captura de audio desde micrófono",
+    "[OK] Análisis de frecuencia usando FFT",
+    "[OK] Detección de notas musicales",
+    "[OK] Interfaz gráfica del afinador",
+    "[OK] Visualización de estado de afinación",
+    "[OK] Tests unitarios básicos"
 ]
 
 FEATURES_PLANNED = [
-    "🔄 Etapa 2: Modo Simon Musical",
-    "🔄 Etapa 3: Juego completo Guitar Hero",
-    "🔄 Sistema de puntuación",
-    "🔄 Carga de canciones MIDI",
-    "🔄 Parser de tablature ASCII",
+    "[PENDING] Etapa 2: Modo Simon Musical",
+    "[PENDING] Etapa 3: Juego completo Guitar Hero",
+    "[PENDING] Sistema de puntuación",
+    "[PENDING] Carga de canciones MIDI",
+    "[PENDING] Parser de tablature ASCII",
     "🔄 Múltiples niveles de dificultad"
 ]
 

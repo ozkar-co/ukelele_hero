@@ -17,7 +17,7 @@ def main():
     """Interfaz principal de la herramienta MIDI"""
     
     print("\n" + "="*60)
-    print("🎸 HERRAMIENTA MIDI PARA UKULELE HERO")
+    print("[MIDI TOOL] HERRAMIENTA MIDI PARA UKULELE HERO")
     print("="*60 + "\n")
     
     # Inicializar cargador MIDI

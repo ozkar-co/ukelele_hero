@@ -17,7 +17,7 @@ def main():
     """Herramienta interactiva para crear tablaturas guardadas"""
     
     print("\n" + "="*60)
-    print("🎸 CREADOR DE TABLATURAS GUARDADAS")
+    print("[TABLATURE CREATOR] CREADOR DE TABLATURAS GUARDADAS")
     print("="*60 + "\n")
     
     # Inicializar
