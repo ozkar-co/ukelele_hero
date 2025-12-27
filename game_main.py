@@ -51,7 +51,7 @@ class GameMenu:
                 self.screen.blit(text, text_rect)
             
             # Instrucciones
-            instr = self.font_medium.render("[FLECHAS]: Navegar | ENTER: Seleccionar", True, (150, 150, 150))
+            instr = self.font_medium.render("[FLECHAS]: Navegar | [ENTER]: Seleccionar", True, (150, 150, 150))
             instr_rect = instr.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 50))
             self.screen.blit(instr, instr_rect)
             
@@ -101,7 +101,7 @@ class GameMenu:
                 self.screen.blit(text, (50, 120 + idx * 50))
             
             # Instrucciones
-            instr = self.font_medium.render("↑/↓: Navegar | ENTER: Seleccionar | ESC: Atrás", 
+            instr = self.font_medium.render("[FLECHAS]: Navegar | [ENTER]: Seleccionar | [ESC]: Atrás", 
                                            True, (150, 150, 150))
             instr_rect = instr.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 50))
             self.screen.blit(instr, instr_rect)

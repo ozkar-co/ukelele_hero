@@ -13,6 +13,7 @@ if str(current_dir) not in sys.path:
     sys.path.insert(0, str(current_dir))
 
 from audio.note_detector import NoteDetector
+from game.ui.string_fret_display import StringFretDisplay
 from utils.config import *
 from utils.helpers import format_frequency, format_cents
 
@@ -26,6 +27,9 @@ class TunerMode:
         
         # Detector de notas
         self.note_detector = NoteDetector()
+        
+        # String/Fret display
+        self.string_fret_display = StringFretDisplay(screen)
         
         # Fuentes
         self.font_huge = pygame.font.Font(None, 96)
@@ -105,6 +109,10 @@ class TunerMode:
             normalized_deviation = max(-max_deviation, min(max_deviation, deviation))
             # Convertir a ángulo (-45° a +45°)
             self.needle_angle = (normalized_deviation / max_deviation) * 45
+            
+            # Actualizar visualización de trastes
+            frequency = self.current_detection['frequency']
+            self.string_fret_display.update_from_frequency(frequency)
         else:
             # Volver aguja al centro
             self.needle_angle *= 0.9  # Suavizado
@@ -130,6 +138,9 @@ class TunerMode:
             self._draw_note_detection()
         else:
             self._draw_no_signal()
+        
+        # Draw string/fret visualization (always visible on the right)
+        self.string_fret_display.draw()
         
         # Instrucciones
         self._draw_instructions()

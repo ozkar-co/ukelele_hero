@@ -306,10 +306,6 @@ class TablatureGameMode:
             (self.HIT_ZONE_X, WINDOW_HEIGHT - 80),
             3
         )
-        
-        # Texto "HIT"
-        hit_text = self.font_large.render("HIT", True, (255, 0, 0))
-        self.screen.blit(hit_text, (self.HIT_ZONE_X - 40, 50))
     
     def _render_notes(self):
         """Renderiza las notas activas"""

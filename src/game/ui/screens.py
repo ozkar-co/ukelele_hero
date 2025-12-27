@@ -88,7 +88,7 @@ class MainMenu:
             
         # Instrucciones
         instructions = [
-            "Usa las flechas ↑↓ para navegar",
+            "Usa las flechas para navegar",
             "Presiona ENTER para seleccionar",
             "ESC para salir"
         ]
