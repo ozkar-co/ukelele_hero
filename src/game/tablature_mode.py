@@ -136,8 +136,10 @@ class TablatureGameMode:
         # Ordenar por tiempo de inicio
         self.upcoming_notes.sort(key=lambda n: n['start_time'])
         
-        self.note_index = 0
-        self.active_notes = []
+        # AGREGAR TODAS LAS NOTAS A active_notes DESDE EL INICIO
+        # Esto permite renderizarlas durante el countdown
+        self.active_notes = self.upcoming_notes.copy()
+        self.note_index = len(self.active_notes)  # Todas las notas ya están cargadas
         
         # Control de pausa
         self.pause_start_time = None  # Momento en que se pausó
@@ -206,45 +208,47 @@ class TablatureGameMode:
     
     def _update(self):
         """Actualiza la lógica del juego"""
-        # Manejar countdown
-        if self.countdown_active:
-            elapsed_since_start = (pygame.time.get_ticks() / 1000.0) - self.start_time
-            self.countdown_remaining = self.countdown_time - elapsed_since_start
-            
-            # Countdown + silencio termina después de 4 segundos
-            if elapsed_since_start >= self.pre_game_total:
-                self.countdown_active = False
-                self.start_time = pygame.time.get_ticks() / 1000.0
-                self.current_time = 0.0
-            return
-        
         if self.game_paused:
             return
         
-        # Actualizar tiempo actual
-        self.current_time = (pygame.time.get_ticks() / 1000.0) - self.start_time
+        # Calcular tiempo según si estamos en countdown o en juego
+        elapsed = (pygame.time.get_ticks() / 1000.0) - self.start_time
         
-        # Agregar notas nuevas que ya debería haber comenzado
-        while (self.note_index < len(self.upcoming_notes) and 
-               self.upcoming_notes[self.note_index]['start_time'] <= self.current_time + 5):
-            self.active_notes.append(self.upcoming_notes[self.note_index])
-            self.note_index += 1
+        if self.countdown_active:
+            # Durante countdown: current_time es NEGATIVO
+            # Countdown: -4 a -1 (4 segundos de espera antes de 0)
+            self.current_time = elapsed - self.pre_game_total
+            
+            if elapsed >= self.pre_game_total:
+                # Countdown terminó, pasar a juego real
+                self.countdown_active = False
+                self.start_time = pygame.time.get_ticks() / 1000.0
+                self.current_time = 0.0
+        else:
+            # Durante juego: current_time avanza desde 0
+            self.current_time = elapsed
         
-        # Actualizar posición de notas activas
-        for note in self.active_notes[:]:
-            # Calcular posición x basado en tiempo
+        # Actualizar posición de todas las notas
+        for note in self.active_notes:
             time_until_hit = note['start_time'] - self.current_time
             pixels_until_hit = time_until_hit * self.NOTE_SPEED_PIXELS_PER_SECOND
             note['x'] = self.HIT_ZONE_X + pixels_until_hit
             
-            # Detectar notas pasadas (misses)
-            if self.current_time > note['end_time']:
+            # Detectar misses solo en juego real (no durante countdown)
+            if not self.countdown_active and self.current_time > note['end_time']:
                 if note not in getattr(self, '_hit_notes', []):
                     self._on_note_miss(note)
-                self.active_notes.remove(note)
+                if note in self.active_notes:
+                    self.active_notes.remove(note)
         
-        # Verificar si el juego terminó
-        if self.note_index >= len(self.upcoming_notes) and not self.active_notes:
+        # Verificar fin del juego
+        if not self.countdown_active and self.active_notes:
+            last_note_end = self.active_notes[-1]['end_time']
+            if self.current_time > last_note_end:
+                # Remover notas que pasaron
+                self.active_notes = [n for n in self.active_notes if self.current_time <= n['end_time']]
+        
+        if not self.countdown_active and not self.active_notes and self.upcoming_notes:
             if self.current_time > (self.upcoming_notes[-1]['end_time'] if self.upcoming_notes else 0):
                 self._on_game_end()
     
@@ -318,10 +322,10 @@ class TablatureGameMode:
     def _render_notes(self):
         """Renderiza las notas activas"""
         for note in self.active_notes:
-            x = note['x']
+            x = note.get('x', WINDOW_WIDTH + 100)
             y = self.string_y_positions[note['string']]
             
-            # No renderizar notas fuera de pantalla
+            # No renderizar notas muy fuera de pantalla
             if x < -self.NOTE_WIDTH or x > WINDOW_WIDTH:
                 continue
             
@@ -342,7 +346,7 @@ class TablatureGameMode:
                 2
             )
             
-            # Número de traste - más visible
+            # Número de traste
             fret_text = self.font_fret.render(str(note['fret']), True, (0, 0, 0))
             fret_rect = fret_text.get_rect(center=(x + self.NOTE_WIDTH // 2, y))
             self.screen.blit(fret_text, fret_rect)
@@ -351,16 +355,14 @@ class TablatureGameMode:
         """Renderiza la información del HUD (puntuación, combo, etc)"""
         # Mostrar countdown si está activo
         if self.countdown_active:
-            elapsed_since_start = (pygame.time.get_ticks() / 1000.0) - self.start_time
+            # Mostrar números 3, 2, 1 basados en current_time
+            # current_time va de -4 a 0 durante countdown
+            countdown_value = int(-self.current_time)
             
-            # Mostrar números 3, 2, 1 durante los primeros 3 segundos
-            if elapsed_since_start < 3.0:
-                countdown_num = max(1, int(3 - elapsed_since_start) + 1)
-                countdown_text = self.font_countdown.render(str(countdown_num), True, (255, 100, 100))
+            if 1 <= countdown_value <= 3:
+                countdown_text = self.font_countdown.render(str(countdown_value), True, (255, 100, 100))
                 countdown_rect = countdown_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
                 self.screen.blit(countdown_text, countdown_rect)
-            # De 3 a 4 segundos: silencio (no mostrar nada)
-            return
         
         hud_y = WINDOW_HEIGHT - 70
         
