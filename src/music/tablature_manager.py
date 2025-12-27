@@ -180,13 +180,17 @@ class TablatureManager:
             fret = self._get_fret(pitch)
             string = self._get_string(pitch)
             
+            # Add 1 second offset for initial silence before gameplay starts
+            start_time = note["start_time"] + 1.0
+            end_time = note["end_time"] + 1.0
+            
             strings[string].append({
                 "fret": fret,
                 "pitch": pitch,
                 "note": note_name,
-                "start_time": note["start_time"],
-                "end_time": note["end_time"],
-                "duration": note["end_time"] - note["start_time"]
+                "start_time": start_time,
+                "end_time": end_time,
+                "duration": end_time - start_time
             })
         
         return {

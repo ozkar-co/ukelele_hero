@@ -77,6 +77,11 @@ def main():
         print("❌ No hay notas en esta pista")
         return
     
+    # Eliminar silencios al inicio y final
+    print("🔇 Eliminando silencios del inicio y final...")
+    notes = loader.trim_silence(notes)
+    print(f"✅ Silencios eliminados")
+    
     # Mostrar rango
     min_note, max_note = loader.get_notes_range(notes)
     min_name = loader.midi_note_to_name(min_note)

@@ -11,1016 +11,1016 @@
   "notes": [
     {
       "pitch": 65,
-      "start_time": 3.4285680000000003,
-      "end_time": 3.5999964000000007,
+      "start_time": 0.0,
+      "end_time": 0.17142840000000037,
       "note_name": "F4"
     },
     {
       "pitch": 69,
-      "start_time": 3.6428535000000006,
-      "end_time": 3.8357104500000005,
+      "start_time": 0.21428550000000035,
+      "end_time": 0.40714245000000027,
       "note_name": "A4"
     },
     {
       "pitch": 71,
-      "start_time": 3.8571390000000005,
-      "end_time": 4.26428145,
+      "start_time": 0.42857100000000026,
+      "end_time": 0.8357134500000001,
       "note_name": "B4"
     },
     {
       "pitch": 65,
-      "start_time": 4.285710000000001,
-      "end_time": 4.457138400000001,
+      "start_time": 0.8571420000000005,
+      "end_time": 1.0285704000000004,
       "note_name": "F4"
     },
     {
       "pitch": 69,
-      "start_time": 4.499995500000001,
-      "end_time": 4.69285245,
+      "start_time": 1.0714275000000004,
+      "end_time": 1.26428445,
       "note_name": "A4"
     },
     {
       "pitch": 71,
-      "start_time": 4.714281000000001,
-      "end_time": 5.121423450000001,
+      "start_time": 1.2857130000000003,
+      "end_time": 1.6928554500000006,
       "note_name": "B4"
     },
     {
       "pitch": 65,
-      "start_time": 5.142852,
-      "end_time": 5.3571375,
+      "start_time": 1.7142840000000001,
+      "end_time": 1.9285695,
       "note_name": "F4"
     },
     {
       "pitch": 69,
-      "start_time": 5.3571375,
-      "end_time": 5.531244468750001,
+      "start_time": 1.9285695,
+      "end_time": 2.1026764687500004,
       "note_name": "A4"
     },
     {
       "pitch": 71,
-      "start_time": 5.571423000000001,
-      "end_time": 5.7455299687500005,
+      "start_time": 2.142855000000001,
+      "end_time": 2.3169619687500003,
       "note_name": "B4"
     },
     {
       "pitch": 76,
-      "start_time": 5.785708500000001,
-      "end_time": 5.9785654500000005,
+      "start_time": 2.3571405000000007,
+      "end_time": 2.54999745,
       "note_name": "E5"
     },
     {
       "pitch": 74,
-      "start_time": 5.999994000000001,
-      "end_time": 6.428565000000001,
+      "start_time": 2.5714260000000007,
+      "end_time": 2.9999970000000005,
       "note_name": "D5"
     },
     {
       "pitch": 71,
-      "start_time": 6.428565000000001,
-      "end_time": 6.642850500000001,
+      "start_time": 2.9999970000000005,
+      "end_time": 3.2142825000000004,
       "note_name": "B4"
     },
     {
       "pitch": 72,
-      "start_time": 6.642850500000001,
-      "end_time": 6.857136000000001,
+      "start_time": 3.2142825000000004,
+      "end_time": 3.4285680000000003,
       "note_name": "C5"
     },
     {
       "pitch": 71,
-      "start_time": 6.857136000000001,
-      "end_time": 7.071421500000001,
+      "start_time": 3.4285680000000003,
+      "end_time": 3.642853500000001,
       "note_name": "B4"
     },
     {
       "pitch": 67,
-      "start_time": 7.071421500000001,
-      "end_time": 7.221421350000001,
+      "start_time": 3.642853500000001,
+      "end_time": 3.7928533500000006,
       "note_name": "G4"
     },
     {
       "pitch": 64,
-      "start_time": 7.285707000000001,
-      "end_time": 8.3571345,
+      "start_time": 3.857139000000001,
+      "end_time": 4.9285665000000005,
       "note_name": "E4"
     },
     {
       "pitch": 62,
-      "start_time": 8.3571345,
-      "end_time": 8.54999145,
+      "start_time": 4.9285665000000005,
+      "end_time": 5.12142345,
       "note_name": "D4"
     },
     {
       "pitch": 64,
+      "start_time": 5.142852000000001,
+      "end_time": 5.3571375,
+      "note_name": "E4"
+    },
+    {
+      "pitch": 67,
+      "start_time": 5.3571375,
+      "end_time": 5.507137350000001,
+      "note_name": "G4"
+    },
+    {
+      "pitch": 64,
+      "start_time": 5.571423000000001,
+      "end_time": 6.6428505000000015,
+      "note_name": "E4"
+    },
+    {
+      "pitch": 65,
+      "start_time": 6.857136000000001,
+      "end_time": 7.042850100000001,
+      "note_name": "F4"
+    },
+    {
+      "pitch": 69,
+      "start_time": 7.071421500000001,
+      "end_time": 7.264278450000001,
+      "note_name": "A4"
+    },
+    {
+      "pitch": 71,
+      "start_time": 7.285707,
+      "end_time": 7.692849450000001,
+      "note_name": "B4"
+    },
+    {
+      "pitch": 65,
+      "start_time": 7.714278000000002,
+      "end_time": 7.8999921,
+      "note_name": "F4"
+    },
+    {
+      "pitch": 69,
+      "start_time": 7.928563500000001,
+      "end_time": 8.12142045,
+      "note_name": "A4"
+    },
+    {
+      "pitch": 71,
+      "start_time": 8.142849000000002,
+      "end_time": 8.549991450000002,
+      "note_name": "B4"
+    },
+    {
+      "pitch": 65,
       "start_time": 8.571420000000002,
       "end_time": 8.7857055,
-      "note_name": "E4"
+      "note_name": "F4"
+    },
+    {
+      "pitch": 69,
+      "start_time": 8.7857055,
+      "end_time": 8.9571339,
+      "note_name": "A4"
+    },
+    {
+      "pitch": 71,
+      "start_time": 8.999991000000001,
+      "end_time": 9.171419400000001,
+      "note_name": "B4"
+    },
+    {
+      "pitch": 76,
+      "start_time": 9.214276500000002,
+      "end_time": 9.385704900000002,
+      "note_name": "E5"
+    },
+    {
+      "pitch": 74,
+      "start_time": 9.428562000000001,
+      "end_time": 9.857133000000001,
+      "note_name": "D5"
+    },
+    {
+      "pitch": 71,
+      "start_time": 9.857133000000001,
+      "end_time": 10.071418500000002,
+      "note_name": "B4"
+    },
+    {
+      "pitch": 72,
+      "start_time": 10.071418500000002,
+      "end_time": 10.285704,
+      "note_name": "C5"
+    },
+    {
+      "pitch": 76,
+      "start_time": 10.285704,
+      "end_time": 10.499989500000002,
+      "note_name": "E5"
+    },
+    {
+      "pitch": 71,
+      "start_time": 10.499989500000002,
+      "end_time": 10.649989350000002,
+      "note_name": "B4"
     },
     {
       "pitch": 67,
-      "start_time": 8.7857055,
-      "end_time": 8.935705350000001,
+      "start_time": 10.714275000000002,
+      "end_time": 11.785702500000001,
       "note_name": "G4"
     },
     {
-      "pitch": 64,
-      "start_time": 8.999991000000001,
-      "end_time": 10.071418500000002,
-      "note_name": "E4"
-    },
-    {
-      "pitch": 65,
-      "start_time": 10.285704,
-      "end_time": 10.471418100000001,
-      "note_name": "F4"
-    },
-    {
-      "pitch": 69,
-      "start_time": 10.499989500000002,
-      "end_time": 10.692846450000001,
-      "note_name": "A4"
-    },
-    {
       "pitch": 71,
-      "start_time": 10.714275,
-      "end_time": 11.121417450000001,
+      "start_time": 11.785702500000001,
+      "end_time": 11.999988000000002,
       "note_name": "B4"
     },
     {
-      "pitch": 65,
-      "start_time": 11.142846000000002,
-      "end_time": 11.3285601,
-      "note_name": "F4"
-    },
-    {
-      "pitch": 69,
-      "start_time": 11.357131500000001,
-      "end_time": 11.54998845,
-      "note_name": "A4"
-    },
-    {
-      "pitch": 71,
-      "start_time": 11.571417000000002,
-      "end_time": 11.978559450000002,
-      "note_name": "B4"
-    },
-    {
-      "pitch": 65,
+      "pitch": 67,
       "start_time": 11.999988000000002,
       "end_time": 12.214273500000001,
-      "note_name": "F4"
-    },
-    {
-      "pitch": 69,
-      "start_time": 12.214273500000001,
-      "end_time": 12.3857019,
-      "note_name": "A4"
-    },
-    {
-      "pitch": 71,
-      "start_time": 12.428559000000002,
-      "end_time": 12.599987400000002,
-      "note_name": "B4"
-    },
-    {
-      "pitch": 76,
-      "start_time": 12.642844500000002,
-      "end_time": 12.814272900000002,
-      "note_name": "E5"
-    },
-    {
-      "pitch": 74,
-      "start_time": 12.857130000000002,
-      "end_time": 13.285701000000001,
-      "note_name": "D5"
-    },
-    {
-      "pitch": 71,
-      "start_time": 13.285701000000001,
-      "end_time": 13.499986500000002,
-      "note_name": "B4"
-    },
-    {
-      "pitch": 72,
-      "start_time": 13.499986500000002,
-      "end_time": 13.714272000000001,
-      "note_name": "C5"
-    },
-    {
-      "pitch": 76,
-      "start_time": 13.714272000000001,
-      "end_time": 13.928557500000002,
-      "note_name": "E5"
-    },
-    {
-      "pitch": 71,
-      "start_time": 13.928557500000002,
-      "end_time": 14.078557350000002,
-      "note_name": "B4"
-    },
-    {
-      "pitch": 67,
-      "start_time": 14.142843000000003,
-      "end_time": 15.214270500000001,
-      "note_name": "G4"
-    },
-    {
-      "pitch": 71,
-      "start_time": 15.214270500000001,
-      "end_time": 15.428556000000002,
-      "note_name": "B4"
-    },
-    {
-      "pitch": 67,
-      "start_time": 15.428556000000002,
-      "end_time": 15.642841500000001,
       "note_name": "G4"
     },
     {
       "pitch": 62,
-      "start_time": 15.642841500000001,
-      "end_time": 15.799984200000003,
+      "start_time": 12.214273500000001,
+      "end_time": 12.371416200000002,
       "note_name": "D4"
     },
     {
       "pitch": 64,
-      "start_time": 15.857127000000002,
-      "end_time": 16.9285545,
+      "start_time": 12.428559000000002,
+      "end_time": 13.4999865,
       "note_name": "E4"
     },
     {
       "pitch": 65,
-      "start_time": 20.571408,
-      "end_time": 20.785693500000004,
+      "start_time": 17.14284,
+      "end_time": 17.357125500000002,
       "note_name": "F4"
     },
     {
       "pitch": 67,
-      "start_time": 20.785693500000004,
-      "end_time": 20.949979050000003,
+      "start_time": 17.357125500000002,
+      "end_time": 17.521411050000005,
       "note_name": "G4"
     },
     {
       "pitch": 69,
-      "start_time": 20.999979000000003,
-      "end_time": 21.42855,
+      "start_time": 17.571411000000005,
+      "end_time": 17.999982000000003,
       "note_name": "A4"
     },
     {
       "pitch": 71,
-      "start_time": 21.42855,
-      "end_time": 21.642835500000004,
+      "start_time": 17.999982000000003,
+      "end_time": 18.214267500000005,
       "note_name": "B4"
     },
     {
       "pitch": 72,
-      "start_time": 21.642835500000004,
-      "end_time": 21.792835350000004,
+      "start_time": 18.214267500000005,
+      "end_time": 18.364267350000006,
       "note_name": "C5"
     },
     {
       "pitch": 74,
-      "start_time": 21.857121000000003,
-      "end_time": 22.285692000000004,
+      "start_time": 18.428553,
+      "end_time": 18.857124000000006,
       "note_name": "D5"
     },
     {
       "pitch": 76,
-      "start_time": 22.285692000000004,
-      "end_time": 22.499977500000004,
+      "start_time": 18.857124000000006,
+      "end_time": 19.0714095,
       "note_name": "E5"
     },
     {
       "pitch": 65,
-      "start_time": 27.428544000000002,
-      "end_time": 27.642829500000005,
+      "start_time": 23.999976000000004,
+      "end_time": 24.214261500000006,
       "note_name": "F4"
     },
     {
       "pitch": 64,
-      "start_time": 27.642829500000005,
-      "end_time": 27.728543700000003,
+      "start_time": 24.214261500000006,
+      "end_time": 24.299975700000005,
       "note_name": "E4"
     },
     {
       "pitch": 69,
-      "start_time": 27.857115000000004,
-      "end_time": 28.071400500000003,
+      "start_time": 24.428547000000002,
+      "end_time": 24.642832500000004,
       "note_name": "A4"
     },
     {
       "pitch": 67,
-      "start_time": 28.071400500000003,
-      "end_time": 28.157114700000005,
+      "start_time": 24.642832500000004,
+      "end_time": 24.728546700000003,
       "note_name": "G4"
     },
     {
       "pitch": 71,
-      "start_time": 28.285686000000005,
-      "end_time": 28.499971500000004,
+      "start_time": 24.857118000000007,
+      "end_time": 25.071403500000002,
       "note_name": "B4"
     },
     {
       "pitch": 69,
-      "start_time": 28.499971500000004,
-      "end_time": 28.585685700000003,
+      "start_time": 25.071403500000002,
+      "end_time": 25.1571177,
       "note_name": "A4"
     },
     {
       "pitch": 72,
-      "start_time": 28.714257000000003,
-      "end_time": 28.928542500000002,
+      "start_time": 25.285689000000005,
+      "end_time": 25.4999745,
       "note_name": "C5"
     },
     {
       "pitch": 71,
-      "start_time": 28.928542500000002,
-      "end_time": 29.014256700000004,
+      "start_time": 25.4999745,
+      "end_time": 25.585688700000006,
       "note_name": "B4"
     },
     {
       "pitch": 74,
-      "start_time": 29.142828000000005,
-      "end_time": 29.357113500000004,
+      "start_time": 25.714260000000003,
+      "end_time": 25.928545500000006,
       "note_name": "D5"
     },
     {
       "pitch": 72,
-      "start_time": 29.357113500000004,
-      "end_time": 29.442827700000002,
+      "start_time": 25.928545500000006,
+      "end_time": 26.014259700000004,
       "note_name": "C5"
     },
     {
       "pitch": 76,
-      "start_time": 29.571399000000003,
-      "end_time": 29.785684500000006,
+      "start_time": 26.142831,
+      "end_time": 26.357116500000004,
       "note_name": "E5"
     },
     {
       "pitch": 74,
-      "start_time": 29.785684500000006,
-      "end_time": 29.871398700000004,
+      "start_time": 26.357116500000004,
+      "end_time": 26.442830700000002,
       "note_name": "D5"
     },
     {
       "pitch": 76,
-      "start_time": 30.214255500000004,
-      "end_time": 30.299969700000005,
+      "start_time": 26.7856875,
+      "end_time": 26.871401700000007,
       "note_name": "E5"
     },
     {
       "pitch": 71,
-      "start_time": 30.428541000000003,
-      "end_time": 30.535683750000004,
+      "start_time": 26.999973000000004,
+      "end_time": 27.107115750000006,
       "note_name": "B4"
     },
     {
       "pitch": 72,
-      "start_time": 30.535683750000004,
-      "end_time": 30.642826500000005,
+      "start_time": 27.107115750000006,
+      "end_time": 27.214258500000007,
       "note_name": "C5"
     },
     {
       "pitch": 69,
-      "start_time": 30.749969250000003,
-      "end_time": 30.857112000000004,
+      "start_time": 27.32140125,
+      "end_time": 27.428544000000002,
       "note_name": "A4"
     },
     {
       "pitch": 71,
-      "start_time": 30.857112000000004,
-      "end_time": 32.999967000000005,
+      "start_time": 27.428544000000002,
+      "end_time": 29.571399000000007,
       "note_name": "B4"
     },
     {
       "pitch": 65,
-      "start_time": 34.286572856250004,
-      "end_time": 34.45800125625001,
+      "start_time": 30.858004856250005,
+      "end_time": 31.02943325625001,
       "note_name": "F4"
     },
     {
       "pitch": 69,
-      "start_time": 34.4999655,
-      "end_time": 34.69282245,
+      "start_time": 31.071397500000003,
+      "end_time": 31.264254450000003,
       "note_name": "A4"
     },
     {
       "pitch": 71,
+      "start_time": 31.285683000000006,
+      "end_time": 31.692825450000008,
+      "note_name": "B4"
+    },
+    {
+      "pitch": 65,
+      "start_time": 31.714254000000004,
+      "end_time": 31.885682400000007,
+      "note_name": "F4"
+    },
+    {
+      "pitch": 69,
+      "start_time": 31.928539500000007,
+      "end_time": 32.121396450000006,
+      "note_name": "A4"
+    },
+    {
+      "pitch": 71,
+      "start_time": 32.14282500000001,
+      "end_time": 32.549967450000004,
+      "note_name": "B4"
+    },
+    {
+      "pitch": 65,
+      "start_time": 32.57139600000001,
+      "end_time": 32.78568150000001,
+      "note_name": "F4"
+    },
+    {
+      "pitch": 69,
+      "start_time": 32.78568150000001,
+      "end_time": 32.959788468750006,
+      "note_name": "A4"
+    },
+    {
+      "pitch": 71,
+      "start_time": 32.999967000000005,
+      "end_time": 33.17407396875001,
+      "note_name": "B4"
+    },
+    {
+      "pitch": 76,
+      "start_time": 33.21425250000001,
+      "end_time": 33.40710945000001,
+      "note_name": "E5"
+    },
+    {
+      "pitch": 74,
+      "start_time": 33.428538,
+      "end_time": 33.85710900000001,
+      "note_name": "D5"
+    },
+    {
+      "pitch": 71,
+      "start_time": 33.85710900000001,
+      "end_time": 34.071394500000004,
+      "note_name": "B4"
+    },
+    {
+      "pitch": 72,
+      "start_time": 34.071394500000004,
+      "end_time": 34.285680000000006,
+      "note_name": "C5"
+    },
+    {
+      "pitch": 71,
+      "start_time": 34.285680000000006,
+      "end_time": 34.49996550000001,
+      "note_name": "B4"
+    },
+    {
+      "pitch": 67,
+      "start_time": 34.49996550000001,
+      "end_time": 34.64996535000001,
+      "note_name": "G4"
+    },
+    {
+      "pitch": 64,
       "start_time": 34.714251000000004,
-      "end_time": 35.12139345000001,
-      "note_name": "B4"
+      "end_time": 35.78567850000001,
+      "note_name": "E4"
     },
     {
-      "pitch": 65,
-      "start_time": 35.142822,
-      "end_time": 35.314250400000006,
-      "note_name": "F4"
+      "pitch": 62,
+      "start_time": 35.78657135625001,
+      "end_time": 35.97942830625001,
+      "note_name": "D4"
     },
     {
-      "pitch": 69,
-      "start_time": 35.357107500000005,
-      "end_time": 35.549964450000004,
-      "note_name": "A4"
-    },
-    {
-      "pitch": 71,
-      "start_time": 35.57139300000001,
-      "end_time": 35.97853545,
-      "note_name": "B4"
-    },
-    {
-      "pitch": 65,
+      "pitch": 64,
       "start_time": 35.999964000000006,
       "end_time": 36.21424950000001,
-      "note_name": "F4"
-    },
-    {
-      "pitch": 69,
-      "start_time": 36.21424950000001,
-      "end_time": 36.388356468750004,
-      "note_name": "A4"
-    },
-    {
-      "pitch": 71,
-      "start_time": 36.428535000000004,
-      "end_time": 36.60264196875001,
-      "note_name": "B4"
-    },
-    {
-      "pitch": 76,
-      "start_time": 36.642820500000006,
-      "end_time": 36.835677450000006,
-      "note_name": "E5"
-    },
-    {
-      "pitch": 74,
-      "start_time": 36.857106,
-      "end_time": 37.28567700000001,
-      "note_name": "D5"
-    },
-    {
-      "pitch": 71,
-      "start_time": 37.28567700000001,
-      "end_time": 37.4999625,
-      "note_name": "B4"
-    },
-    {
-      "pitch": 72,
-      "start_time": 37.4999625,
-      "end_time": 37.714248000000005,
-      "note_name": "C5"
-    },
-    {
-      "pitch": 71,
-      "start_time": 37.714248000000005,
-      "end_time": 37.92853350000001,
-      "note_name": "B4"
+      "note_name": "E4"
     },
     {
       "pitch": 67,
-      "start_time": 37.92853350000001,
-      "end_time": 38.07853335000001,
+      "start_time": 36.21424950000001,
+      "end_time": 36.36424935000001,
       "note_name": "G4"
     },
     {
       "pitch": 64,
-      "start_time": 38.142819,
-      "end_time": 39.21424650000001,
+      "start_time": 36.428535000000004,
+      "end_time": 37.49996250000001,
       "note_name": "E4"
     },
     {
-      "pitch": 62,
-      "start_time": 39.215139356250006,
-      "end_time": 39.407996306250006,
-      "note_name": "D4"
+      "pitch": 65,
+      "start_time": 37.714248000000005,
+      "end_time": 37.89996210000001,
+      "note_name": "F4"
     },
     {
-      "pitch": 64,
+      "pitch": 69,
+      "start_time": 37.92853350000001,
+      "end_time": 38.12139045000001,
+      "note_name": "A4"
+    },
+    {
+      "pitch": 71,
+      "start_time": 38.14281900000001,
+      "end_time": 38.549961450000005,
+      "note_name": "B4"
+    },
+    {
+      "pitch": 65,
+      "start_time": 38.57139000000001,
+      "end_time": 38.75710410000001,
+      "note_name": "F4"
+    },
+    {
+      "pitch": 69,
+      "start_time": 38.7856755,
+      "end_time": 38.97853245000001,
+      "note_name": "A4"
+    },
+    {
+      "pitch": 71,
+      "start_time": 38.999961000000006,
+      "end_time": 39.40710345000001,
+      "note_name": "B4"
+    },
+    {
+      "pitch": 65,
       "start_time": 39.428532000000004,
       "end_time": 39.64281750000001,
-      "note_name": "E4"
+      "note_name": "F4"
     },
     {
-      "pitch": 67,
+      "pitch": 69,
       "start_time": 39.64281750000001,
-      "end_time": 39.79281735000001,
-      "note_name": "G4"
-    },
-    {
-      "pitch": 64,
-      "start_time": 39.857103,
-      "end_time": 40.92853050000001,
-      "note_name": "E4"
-    },
-    {
-      "pitch": 65,
-      "start_time": 41.142816,
-      "end_time": 41.32853010000001,
-      "note_name": "F4"
-    },
-    {
-      "pitch": 69,
-      "start_time": 41.357101500000006,
-      "end_time": 41.549958450000005,
+      "end_time": 39.81424590000001,
       "note_name": "A4"
     },
     {
       "pitch": 71,
-      "start_time": 41.57138700000001,
-      "end_time": 41.97852945,
-      "note_name": "B4"
-    },
-    {
-      "pitch": 65,
-      "start_time": 41.99995800000001,
-      "end_time": 42.185672100000005,
-      "note_name": "F4"
-    },
-    {
-      "pitch": 69,
-      "start_time": 42.2142435,
-      "end_time": 42.40710045000001,
-      "note_name": "A4"
-    },
-    {
-      "pitch": 71,
-      "start_time": 42.428529000000005,
-      "end_time": 42.83567145000001,
-      "note_name": "B4"
-    },
-    {
-      "pitch": 65,
-      "start_time": 42.8571,
-      "end_time": 43.071385500000005,
-      "note_name": "F4"
-    },
-    {
-      "pitch": 69,
-      "start_time": 43.071385500000005,
-      "end_time": 43.24281390000001,
-      "note_name": "A4"
-    },
-    {
-      "pitch": 71,
-      "start_time": 43.28567100000001,
-      "end_time": 43.457099400000004,
+      "start_time": 39.85710300000001,
+      "end_time": 40.028531400000006,
       "note_name": "B4"
     },
     {
       "pitch": 76,
-      "start_time": 43.4999565,
-      "end_time": 43.67138490000001,
+      "start_time": 40.071388500000005,
+      "end_time": 40.24281690000001,
       "note_name": "E5"
     },
     {
       "pitch": 74,
-      "start_time": 43.714242000000006,
-      "end_time": 44.142813000000004,
+      "start_time": 40.28567400000001,
+      "end_time": 40.714245000000005,
       "note_name": "D5"
     },
     {
       "pitch": 71,
-      "start_time": 44.142813000000004,
-      "end_time": 44.357098500000006,
+      "start_time": 40.714245000000005,
+      "end_time": 40.92853050000001,
       "note_name": "B4"
     },
     {
       "pitch": 72,
-      "start_time": 44.357098500000006,
-      "end_time": 44.57138400000001,
+      "start_time": 40.92853050000001,
+      "end_time": 41.14281600000001,
       "note_name": "C5"
     },
     {
       "pitch": 76,
-      "start_time": 44.57138400000001,
-      "end_time": 44.785669500000004,
+      "start_time": 41.14281600000001,
+      "end_time": 41.357101500000006,
       "note_name": "E5"
     },
     {
       "pitch": 71,
-      "start_time": 44.785669500000004,
-      "end_time": 44.935669350000005,
+      "start_time": 41.357101500000006,
+      "end_time": 41.507101350000006,
       "note_name": "B4"
     },
     {
       "pitch": 67,
-      "start_time": 44.99995500000001,
-      "end_time": 46.071382500000006,
+      "start_time": 41.57138700000001,
+      "end_time": 42.64281450000001,
       "note_name": "G4"
     },
     {
       "pitch": 71,
-      "start_time": 46.07227535625,
-      "end_time": 46.286560856250006,
+      "start_time": 42.643707356250005,
+      "end_time": 42.85799285625001,
       "note_name": "B4"
     },
     {
       "pitch": 67,
-      "start_time": 46.28566800000001,
-      "end_time": 46.499953500000004,
+      "start_time": 42.85710000000001,
+      "end_time": 43.071385500000005,
       "note_name": "G4"
     },
     {
       "pitch": 62,
-      "start_time": 46.499953500000004,
-      "end_time": 46.657096200000005,
+      "start_time": 43.071385500000005,
+      "end_time": 43.22852820000001,
       "note_name": "D4"
     },
     {
       "pitch": 64,
-      "start_time": 46.714239000000006,
-      "end_time": 47.785666500000005,
+      "start_time": 43.28567100000001,
+      "end_time": 44.357098500000006,
       "note_name": "E4"
     },
     {
       "pitch": 65,
-      "start_time": 51.428520000000006,
-      "end_time": 51.64280550000001,
+      "start_time": 47.99995200000001,
+      "end_time": 48.21423750000001,
       "note_name": "F4"
     },
     {
       "pitch": 67,
-      "start_time": 51.64280550000001,
-      "end_time": 51.807091050000004,
+      "start_time": 48.21423750000001,
+      "end_time": 48.378523050000005,
       "note_name": "G4"
     },
     {
       "pitch": 69,
-      "start_time": 51.857091000000004,
-      "end_time": 52.28566200000001,
+      "start_time": 48.428523000000006,
+      "end_time": 48.85709400000001,
       "note_name": "A4"
     },
     {
       "pitch": 71,
-      "start_time": 52.28566200000001,
-      "end_time": 52.499947500000005,
+      "start_time": 48.85709400000001,
+      "end_time": 49.071379500000006,
       "note_name": "B4"
     },
     {
       "pitch": 72,
-      "start_time": 52.499947500000005,
-      "end_time": 52.649947350000005,
+      "start_time": 49.071379500000006,
+      "end_time": 49.22137935000001,
       "note_name": "C5"
     },
     {
       "pitch": 74,
-      "start_time": 52.71423300000001,
-      "end_time": 53.142804000000005,
+      "start_time": 49.28566500000001,
+      "end_time": 49.71423600000001,
       "note_name": "D5"
     },
     {
       "pitch": 76,
-      "start_time": 53.142804000000005,
-      "end_time": 53.35708950000001,
+      "start_time": 49.71423600000001,
+      "end_time": 49.92852150000001,
       "note_name": "E5"
     },
     {
       "pitch": 65,
-      "start_time": 58.28565600000001,
-      "end_time": 58.499941500000006,
+      "start_time": 54.85708800000001,
+      "end_time": 55.07137350000001,
       "note_name": "F4"
     },
     {
       "pitch": 64,
-      "start_time": 58.499941500000006,
-      "end_time": 58.58565570000001,
+      "start_time": 55.07137350000001,
+      "end_time": 55.15708770000001,
       "note_name": "E4"
     },
     {
       "pitch": 69,
-      "start_time": 58.71422700000001,
-      "end_time": 58.92851250000001,
+      "start_time": 55.28565900000001,
+      "end_time": 55.49994450000001,
       "note_name": "A4"
     },
     {
       "pitch": 67,
-      "start_time": 58.92851250000001,
-      "end_time": 59.01422670000001,
+      "start_time": 55.49994450000001,
+      "end_time": 55.58565870000001,
       "note_name": "G4"
     },
     {
       "pitch": 71,
-      "start_time": 59.142798000000006,
-      "end_time": 59.35708350000001,
+      "start_time": 55.71423000000001,
+      "end_time": 55.92851550000001,
       "note_name": "B4"
     },
     {
       "pitch": 69,
-      "start_time": 59.35708350000001,
-      "end_time": 59.44279770000001,
+      "start_time": 55.92851550000001,
+      "end_time": 56.01422970000001,
       "note_name": "A4"
     },
     {
       "pitch": 72,
-      "start_time": 59.57136900000001,
-      "end_time": 59.78565450000001,
+      "start_time": 56.14280100000001,
+      "end_time": 56.35708650000001,
       "note_name": "C5"
     },
     {
       "pitch": 71,
-      "start_time": 59.78565450000001,
-      "end_time": 59.871368700000005,
+      "start_time": 56.35708650000001,
+      "end_time": 56.44280070000001,
       "note_name": "B4"
     },
     {
       "pitch": 74,
-      "start_time": 59.99994000000001,
-      "end_time": 60.214225500000005,
+      "start_time": 56.57137200000001,
+      "end_time": 56.785657500000006,
       "note_name": "D5"
     },
     {
       "pitch": 72,
-      "start_time": 60.214225500000005,
-      "end_time": 60.29993970000001,
+      "start_time": 56.785657500000006,
+      "end_time": 56.87137170000001,
       "note_name": "C5"
     },
     {
       "pitch": 76,
-      "start_time": 60.42851100000001,
-      "end_time": 60.64279650000001,
+      "start_time": 56.99994300000001,
+      "end_time": 57.21422850000001,
       "note_name": "E5"
     },
     {
       "pitch": 74,
-      "start_time": 60.64279650000001,
-      "end_time": 60.72851070000001,
+      "start_time": 57.21422850000001,
+      "end_time": 57.29994270000001,
       "note_name": "D5"
     },
     {
       "pitch": 76,
-      "start_time": 61.07136750000001,
-      "end_time": 61.157081700000006,
+      "start_time": 57.64279950000001,
+      "end_time": 57.72851370000001,
       "note_name": "E5"
     },
     {
       "pitch": 71,
-      "start_time": 61.28565300000001,
-      "end_time": 61.392795750000005,
+      "start_time": 57.85708500000001,
+      "end_time": 57.964227750000006,
       "note_name": "B4"
     },
     {
       "pitch": 72,
-      "start_time": 61.392795750000005,
-      "end_time": 61.499938500000006,
+      "start_time": 57.964227750000006,
+      "end_time": 58.07137050000001,
       "note_name": "C5"
     },
     {
       "pitch": 69,
-      "start_time": 61.60708125000001,
-      "end_time": 61.71422400000001,
+      "start_time": 58.17851325000001,
+      "end_time": 58.28565600000001,
       "note_name": "A4"
     },
     {
       "pitch": 71,
-      "start_time": 61.71422400000001,
-      "end_time": 63.857079000000006,
+      "start_time": 58.28565600000001,
+      "end_time": 60.42851100000001,
       "note_name": "B4"
     },
     {
       "pitch": 65,
-      "start_time": 65.14368485625,
-      "end_time": 65.31511325625002,
+      "start_time": 61.715116856250006,
+      "end_time": 61.88654525625002,
       "note_name": "F4"
     },
     {
       "pitch": 69,
-      "start_time": 65.3570775,
-      "end_time": 65.54993445000001,
+      "start_time": 61.928509500000004,
+      "end_time": 62.12136645000001,
       "note_name": "A4"
     },
     {
       "pitch": 71,
+      "start_time": 62.14279500000001,
+      "end_time": 62.549937450000016,
+      "note_name": "B4"
+    },
+    {
+      "pitch": 65,
+      "start_time": 62.57136600000001,
+      "end_time": 62.74279440000001,
+      "note_name": "F4"
+    },
+    {
+      "pitch": 69,
+      "start_time": 62.785651500000014,
+      "end_time": 62.97850845000001,
+      "note_name": "A4"
+    },
+    {
+      "pitch": 71,
+      "start_time": 62.99993700000002,
+      "end_time": 63.40707945000001,
+      "note_name": "B4"
+    },
+    {
+      "pitch": 65,
+      "start_time": 63.42850800000001,
+      "end_time": 63.64279350000001,
+      "note_name": "F4"
+    },
+    {
+      "pitch": 69,
+      "start_time": 63.64279350000001,
+      "end_time": 63.816900468750006,
+      "note_name": "A4"
+    },
+    {
+      "pitch": 71,
+      "start_time": 63.85707900000001,
+      "end_time": 64.03118596875001,
+      "note_name": "B4"
+    },
+    {
+      "pitch": 76,
+      "start_time": 64.07136450000002,
+      "end_time": 64.26422145000001,
+      "note_name": "E5"
+    },
+    {
+      "pitch": 74,
+      "start_time": 64.28565,
+      "end_time": 64.71422100000001,
+      "note_name": "D5"
+    },
+    {
+      "pitch": 71,
+      "start_time": 64.71422100000001,
+      "end_time": 64.92850650000001,
+      "note_name": "B4"
+    },
+    {
+      "pitch": 72,
+      "start_time": 64.92850650000001,
+      "end_time": 65.14279200000001,
+      "note_name": "C5"
+    },
+    {
+      "pitch": 71,
+      "start_time": 65.14279200000001,
+      "end_time": 65.35707750000002,
+      "note_name": "B4"
+    },
+    {
+      "pitch": 67,
+      "start_time": 65.35707750000002,
+      "end_time": 65.50707735000002,
+      "note_name": "G4"
+    },
+    {
+      "pitch": 64,
       "start_time": 65.571363,
-      "end_time": 65.97850545000001,
-      "note_name": "B4"
+      "end_time": 66.6427905,
+      "note_name": "E4"
     },
     {
-      "pitch": 65,
-      "start_time": 65.99993400000001,
-      "end_time": 66.1713624,
-      "note_name": "F4"
+      "pitch": 62,
+      "start_time": 66.64368335625001,
+      "end_time": 66.83654030625001,
+      "note_name": "D4"
     },
     {
-      "pitch": 69,
-      "start_time": 66.21421950000001,
-      "end_time": 66.40707645,
-      "note_name": "A4"
-    },
-    {
-      "pitch": 71,
-      "start_time": 66.42850500000002,
-      "end_time": 66.83564745000001,
-      "note_name": "B4"
-    },
-    {
-      "pitch": 65,
+      "pitch": 64,
       "start_time": 66.857076,
       "end_time": 67.07136150000001,
-      "note_name": "F4"
-    },
-    {
-      "pitch": 69,
-      "start_time": 67.07136150000001,
-      "end_time": 67.24546846875,
-      "note_name": "A4"
-    },
-    {
-      "pitch": 71,
-      "start_time": 67.28564700000001,
-      "end_time": 67.45975396875001,
-      "note_name": "B4"
-    },
-    {
-      "pitch": 76,
-      "start_time": 67.49993250000001,
-      "end_time": 67.69278945,
-      "note_name": "E5"
-    },
-    {
-      "pitch": 74,
-      "start_time": 67.714218,
-      "end_time": 68.14278900000001,
-      "note_name": "D5"
-    },
-    {
-      "pitch": 71,
-      "start_time": 68.14278900000001,
-      "end_time": 68.35707450000001,
-      "note_name": "B4"
-    },
-    {
-      "pitch": 72,
-      "start_time": 68.35707450000001,
-      "end_time": 68.57136000000001,
-      "note_name": "C5"
-    },
-    {
-      "pitch": 71,
-      "start_time": 68.57136000000001,
-      "end_time": 68.78564550000002,
-      "note_name": "B4"
+      "note_name": "E4"
     },
     {
       "pitch": 67,
-      "start_time": 68.78564550000002,
-      "end_time": 68.93564535000002,
+      "start_time": 67.07136150000001,
+      "end_time": 67.22136135000001,
       "note_name": "G4"
     },
     {
       "pitch": 64,
-      "start_time": 68.999931,
-      "end_time": 70.0713585,
+      "start_time": 67.28564700000001,
+      "end_time": 68.35707450000001,
       "note_name": "E4"
     },
     {
-      "pitch": 62,
-      "start_time": 70.07225135625,
-      "end_time": 70.26510830625001,
-      "note_name": "D4"
+      "pitch": 65,
+      "start_time": 68.57136000000001,
+      "end_time": 68.75707410000001,
+      "note_name": "F4"
     },
     {
-      "pitch": 64,
+      "pitch": 69,
+      "start_time": 68.78564550000002,
+      "end_time": 68.97850245000001,
+      "note_name": "A4"
+    },
+    {
+      "pitch": 71,
+      "start_time": 68.99993100000002,
+      "end_time": 69.40707345000001,
+      "note_name": "B4"
+    },
+    {
+      "pitch": 65,
+      "start_time": 69.42850200000001,
+      "end_time": 69.61421610000001,
+      "note_name": "F4"
+    },
+    {
+      "pitch": 69,
+      "start_time": 69.64278750000001,
+      "end_time": 69.83564445000002,
+      "note_name": "A4"
+    },
+    {
+      "pitch": 71,
+      "start_time": 69.85707300000001,
+      "end_time": 70.26421545000001,
+      "note_name": "B4"
+    },
+    {
+      "pitch": 65,
       "start_time": 70.285644,
       "end_time": 70.49992950000001,
-      "note_name": "E4"
+      "note_name": "F4"
     },
     {
-      "pitch": 67,
+      "pitch": 69,
       "start_time": 70.49992950000001,
-      "end_time": 70.64992935000001,
-      "note_name": "G4"
+      "end_time": 70.67135790000002,
+      "note_name": "A4"
     },
     {
-      "pitch": 64,
+      "pitch": 71,
       "start_time": 70.71421500000001,
-      "end_time": 71.78564250000001,
-      "note_name": "E4"
-    },
-    {
-      "pitch": 65,
-      "start_time": 71.99992800000001,
-      "end_time": 72.18564210000001,
-      "note_name": "F4"
-    },
-    {
-      "pitch": 69,
-      "start_time": 72.21421350000001,
-      "end_time": 72.40707045,
-      "note_name": "A4"
-    },
-    {
-      "pitch": 71,
-      "start_time": 72.42849900000002,
-      "end_time": 72.83564145000001,
-      "note_name": "B4"
-    },
-    {
-      "pitch": 65,
-      "start_time": 72.85707000000001,
-      "end_time": 73.0427841,
-      "note_name": "F4"
-    },
-    {
-      "pitch": 69,
-      "start_time": 73.07135550000001,
-      "end_time": 73.26421245000002,
-      "note_name": "A4"
-    },
-    {
-      "pitch": 71,
-      "start_time": 73.28564100000001,
-      "end_time": 73.69278345000001,
-      "note_name": "B4"
-    },
-    {
-      "pitch": 65,
-      "start_time": 73.714212,
-      "end_time": 73.9284975,
-      "note_name": "F4"
-    },
-    {
-      "pitch": 69,
-      "start_time": 73.9284975,
-      "end_time": 74.09992590000002,
-      "note_name": "A4"
-    },
-    {
-      "pitch": 71,
-      "start_time": 74.14278300000001,
-      "end_time": 74.3142114,
+      "end_time": 70.8856434,
       "note_name": "B4"
     },
     {
       "pitch": 76,
-      "start_time": 74.35706850000001,
-      "end_time": 74.52849690000001,
+      "start_time": 70.92850050000001,
+      "end_time": 71.09992890000001,
       "note_name": "E5"
     },
     {
       "pitch": 74,
-      "start_time": 74.57135400000001,
-      "end_time": 74.999925,
+      "start_time": 71.14278600000002,
+      "end_time": 71.571357,
       "note_name": "D5"
     },
     {
       "pitch": 71,
-      "start_time": 74.999925,
-      "end_time": 75.21421050000001,
+      "start_time": 71.571357,
+      "end_time": 71.78564250000001,
       "note_name": "B4"
     },
     {
       "pitch": 72,
-      "start_time": 75.21421050000001,
-      "end_time": 75.42849600000001,
+      "start_time": 71.78564250000001,
+      "end_time": 71.99992800000001,
       "note_name": "C5"
     },
     {
       "pitch": 76,
-      "start_time": 75.42849600000001,
-      "end_time": 75.64278150000001,
+      "start_time": 71.99992800000001,
+      "end_time": 72.21421350000001,
       "note_name": "E5"
     },
     {
       "pitch": 71,
-      "start_time": 75.64278150000001,
-      "end_time": 75.79278135000001,
+      "start_time": 72.21421350000001,
+      "end_time": 72.36421335000001,
       "note_name": "B4"
     },
     {
       "pitch": 67,
-      "start_time": 75.85706700000001,
-      "end_time": 76.92849450000001,
+      "start_time": 72.42849900000002,
+      "end_time": 73.49992650000002,
       "note_name": "G4"
     },
     {
       "pitch": 71,
-      "start_time": 76.92849450000001,
-      "end_time": 77.14278000000002,
+      "start_time": 73.49992650000002,
+      "end_time": 73.71421200000002,
       "note_name": "B4"
     },
     {
       "pitch": 67,
-      "start_time": 77.14278000000002,
-      "end_time": 77.3570655,
+      "start_time": 73.71421200000002,
+      "end_time": 73.9284975,
       "note_name": "G4"
     },
     {
       "pitch": 62,
-      "start_time": 77.3570655,
-      "end_time": 77.51420820000001,
+      "start_time": 73.9284975,
+      "end_time": 74.08564020000001,
       "note_name": "D4"
     },
     {
       "pitch": 64,
-      "start_time": 77.571351,
-      "end_time": 78.6427785,
+      "start_time": 74.14278300000001,
+      "end_time": 75.21421050000001,
       "note_name": "E4"
     }
   ],
   "statistics": {
     "total_notes": 168,
-    "duration": 78.6427785,
+    "duration": 75.21421050000001,
     "min_pitch": 62,
     "max_pitch": 76
   },

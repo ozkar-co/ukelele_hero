@@ -236,3 +236,32 @@ class MIDILoader:
                 adjusted_notes = self.transpose_notes(adjusted_notes, -1)
         
         return adjusted_notes, octaves_needed
+    
+    @staticmethod
+    def trim_silence(notes: List[Tuple[int, float, float]], 
+                     silence_threshold: float = 0.5) -> List[Tuple[int, float, float]]:
+        """
+        Elimina silencios al inicio y final de la secuencia de notas
+        
+        Args:
+            notes (List[Tuple[int, float, float]]): Lista de (pitch, start_time, end_time)
+            silence_threshold (float): Duración mínima considerada como silencio (segundos)
+            
+        Returns:
+            List[Tuple[int, float, float]]: Notas sin silencios al inicio/final
+        """
+        if not notes:
+            return notes
+        
+        # Obtener tiempo del primer evento de nota
+        first_note_start = notes[0][1]
+        last_note_end = notes[-1][2]
+        
+        # Recalcular tiempos relativos (eliminar silencio del inicio)
+        adjusted_notes = []
+        for pitch, start, end in notes:
+            new_start = start - first_note_start
+            new_end = end - first_note_start
+            adjusted_notes.append((pitch, new_start, new_end))
+        
+        return adjusted_notes

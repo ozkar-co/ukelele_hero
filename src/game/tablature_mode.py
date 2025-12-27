@@ -34,6 +34,7 @@ class TablatureGameMode:
     HIT_ZONE_MARGIN = 100  # Margen de error en pixels
     
     NOTE_WIDTH = 30  # Ancho de las notas
+    NOTE_HEIGHT = 50  # Alto fijo de las notas (rectángulos)
     NOTE_SPEED_PIXELS_PER_SECOND = 400  # Velocidad en pixels/segundo
     
     def __init__(self, screen):
@@ -47,6 +48,11 @@ class TablatureGameMode:
         self.current_tablature = None
         self.is_running = False
         self.game_paused = False
+        self.countdown_active = False  # Countdown antes de empezar
+        self.countdown_time = 3.0  # Tiempo del countdown en segundos
+        self.countdown_remaining = 3.0
+        self.silence_time = 1.0  # Segundos de silencio después del countdown (1 seg)
+        self.pre_game_total = 4.0  # Total: 3 seg countdown + 1 seg silencio
         self.current_time = 0.0  # Tiempo en segundos
         self.start_time = 0.0
         
@@ -70,6 +76,8 @@ class TablatureGameMode:
         self.font_large = pygame.font.Font(None, 72)
         self.font_medium = pygame.font.Font(None, 36)
         self.font_small = pygame.font.Font(None, 24)
+        self.font_countdown = pygame.font.Font(None, 150)
+        self.font_fret = pygame.font.Font(None, 40)
         
         # Cálculos de layout
         self._calculate_layout()
@@ -130,6 +138,9 @@ class TablatureGameMode:
         
         self.note_index = 0
         self.active_notes = []
+        
+        # Control de pausa
+        self.pause_start_time = None  # Momento en que se pausó
     def start(self):
         """Inicia el modo juego"""
         if not self.current_tablature:
@@ -143,6 +154,8 @@ class TablatureGameMode:
             print("⚠️ No se pudo iniciar detección de audio, continuando sin validación")
         
         self.is_running = True
+        self.countdown_active = True  # Activar countdown
+        self.countdown_remaining = 3.0
         self.score = 0
         self.combo = 0
         self.hits = 0
@@ -180,36 +193,31 @@ class TablatureGameMode:
                 
                 elif event.key == pygame.K_SPACE:
                     self.game_paused = not self.game_paused
-                
-                # Simular toques de cuerdas para testing
-                elif event.key == pygame.K_g:
-                    self._simulate_string_hit('G')
-                elif event.key == pygame.K_c:
-                    self._simulate_string_hit('C')
-                elif event.key == pygame.K_e:
-                    self._simulate_string_hit('E')
-                elif event.key == pygame.K_a:
-                    self._simulate_string_hit('A')
-    
-    def _simulate_string_hit(self, string_name: str):
-        """Simula un golpe en una cuerda (para testing)"""
-        # Buscar nota activa en esa cuerda
-        for note in self.active_notes[:]:
-            if note['string'] == string_name:
-                # Calcular error de timing
-                time_error = abs(self.current_time - note['start_time'])
-                
-                if time_error < 0.15:  # 150ms de tolerancia
-                    self._on_note_hit(note, time_error)
-                    self.active_notes.remove(note)
-                else:
-                    self._on_note_miss(note)
-                    self.active_notes.remove(note)
-                
-                return
+                    
+                    if self.game_paused:
+                        # Guardar el tiempo de pausa
+                        self.pause_start_time = pygame.time.get_ticks() / 1000.0
+                    else:
+                        # Reanudar: Ajustar start_time para mantener current_time
+                        if self.pause_start_time is not None:
+                            pause_duration = (pygame.time.get_ticks() / 1000.0) - self.pause_start_time
+                            self.start_time += pause_duration
+                            self.pause_start_time = None
     
     def _update(self):
         """Actualiza la lógica del juego"""
+        # Manejar countdown
+        if self.countdown_active:
+            elapsed_since_start = (pygame.time.get_ticks() / 1000.0) - self.start_time
+            self.countdown_remaining = self.countdown_time - elapsed_since_start
+            
+            # Countdown + silencio termina después de 4 segundos
+            if elapsed_since_start >= self.pre_game_total:
+                self.countdown_active = False
+                self.start_time = pygame.time.get_ticks() / 1000.0
+                self.current_time = 0.0
+            return
+        
         if self.game_paused:
             return
         
@@ -319,31 +327,41 @@ class TablatureGameMode:
             
             color = self.STRING_COLORS[note['string']]
             
-            # Dibuja la nota como un rectángulo
-            # La altura depende de la duración de la nota
-            note_height = max(20, (note['duration'] * self.NOTE_SPEED_PIXELS_PER_SECOND) / 2)
-            
+            # Dibuja la nota como un rectángulo de tamaño fijo
             pygame.draw.rect(
                 self.screen,
                 color,
-                (x, y - note_height // 2, self.NOTE_WIDTH, note_height)
+                (x, y - self.NOTE_HEIGHT // 2, self.NOTE_WIDTH, self.NOTE_HEIGHT)
             )
             
             # Borde más oscuro
             pygame.draw.rect(
                 self.screen,
                 tuple(c // 2 for c in color),
-                (x, y - note_height // 2, self.NOTE_WIDTH, note_height),
+                (x, y - self.NOTE_HEIGHT // 2, self.NOTE_WIDTH, self.NOTE_HEIGHT),
                 2
             )
             
-            # Número de traste
-            fret_text = self.font_small.render(str(note['fret']), True, (0, 0, 0))
+            # Número de traste - más visible
+            fret_text = self.font_fret.render(str(note['fret']), True, (0, 0, 0))
             fret_rect = fret_text.get_rect(center=(x + self.NOTE_WIDTH // 2, y))
             self.screen.blit(fret_text, fret_rect)
     
     def _render_hud(self):
         """Renderiza la información del HUD (puntuación, combo, etc)"""
+        # Mostrar countdown si está activo
+        if self.countdown_active:
+            elapsed_since_start = (pygame.time.get_ticks() / 1000.0) - self.start_time
+            
+            # Mostrar números 3, 2, 1 durante los primeros 3 segundos
+            if elapsed_since_start < 3.0:
+                countdown_num = max(1, int(3 - elapsed_since_start) + 1)
+                countdown_text = self.font_countdown.render(str(countdown_num), True, (255, 100, 100))
+                countdown_rect = countdown_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+                self.screen.blit(countdown_text, countdown_rect)
+            # De 3 a 4 segundos: silencio (no mostrar nada)
+            return
+        
         hud_y = WINDOW_HEIGHT - 70
         
         # Score
@@ -369,7 +387,7 @@ class TablatureGameMode:
             pause_rect = pause_surface.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
             self.screen.blit(pause_surface, pause_rect)
         else:
-            instructions = "Teclas: G=Cuerda G | C=Cuerda C | E=Cuerda E | A=Cuerda A | ESC=Salir"
+            instructions = "ESPACIO=Pausa | ESC=Salir"
             inst_surface = self.font_small.render(instructions, True, (150, 150, 150))
             self.screen.blit(inst_surface, (20, WINDOW_HEIGHT - 25))
     
