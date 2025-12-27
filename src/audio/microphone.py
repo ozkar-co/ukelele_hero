@@ -2,7 +2,7 @@
 Captura de audio desde el micrófono
 """
 
-import pyaudio
+import sounddevice as sd
 import numpy as np
 import threading
 import time
@@ -17,47 +17,21 @@ class MicrophoneCapture:
         self.buffer_size = buffer_size
         self.channels = channels
         
-        self.audio = pyaudio.PyAudio()
         self.stream = None
         self.is_recording = False
+        self.device_index = None
         
         # Buffer circular para almacenar datos de audio
         self.audio_buffer = np.zeros(buffer_size * 4)  # Buffer más grande para análisis
         self.buffer_lock = threading.Lock()
         
-        # Thread para captura continua
-        self.capture_thread = None
-        
-    def start_capture(self):
-        """Inicia la captura de audio"""
-        try:
-            # Configurar stream de audio
-            self.stream = self.audio.open(
-                format=pyaudio.paFloat32,
-                channels=self.channels,
-                rate=self.sample_rate,
-                input=True,
-                frames_per_buffer=self.buffer_size,
-                stream_callback=self._audio_callback
-            )
-            
-            self.is_recording = True
-            self.stream.start_stream()
-            print("Captura de audio iniciada")
-            
-        except Exception as e:
-            print(f"Error al iniciar captura de audio: {e}")
-            return False
-            
-        return True
-    
-    def _audio_callback(self, in_data, frame_count, time_info, status):
+    def _audio_callback(self, indata, frames, time_info, status):
         """Callback para procesar datos de audio entrantes"""
         if status:
-            print(f"Status de audio: {status}")
+            print(f"Estado de audio: {status}")
         
-        # Convertir datos a array numpy
-        audio_data = np.frombuffer(in_data, dtype=np.float32)
+        # Convertir datos a array numpy (sounddevice ya lo proporciona en float32)
+        audio_data = indata[:, 0] if self.channels == 1 else indata.mean(axis=1)
         
         # Actualizar buffer circular
         with self.buffer_lock:
@@ -65,8 +39,29 @@ class MicrophoneCapture:
             self.audio_buffer[:-len(audio_data)] = self.audio_buffer[len(audio_data):]
             # Agregar nuevos datos
             self.audio_buffer[-len(audio_data):] = audio_data
-        
-        return (None, pyaudio.paContinue)
+    
+    def start_capture(self):
+        """Inicia la captura de audio"""
+        try:
+            # Configurar stream de audio con sounddevice
+            self.stream = sd.InputStream(
+                device=self.device_index,
+                samplerate=self.sample_rate,
+                channels=self.channels,
+                blocksize=self.buffer_size,
+                callback=self._audio_callback,
+                dtype=np.float32
+            )
+            
+            self.is_recording = True
+            self.stream.start()
+            print("Captura de audio iniciada")
+            
+        except Exception as e:
+            print(f"Error al iniciar captura de audio: {e}")
+            return False
+            
+        return True
     
     def get_audio_data(self, length=None):
         """
@@ -89,11 +84,8 @@ class MicrophoneCapture:
         self.is_recording = False
         
         if self.stream:
-            self.stream.stop_stream()
+            self.stream.stop()
             self.stream.close()
-            
-        if self.audio:
-            self.audio.terminate()
             
         print("Captura de audio detenida")
     
@@ -101,14 +93,13 @@ class MicrophoneCapture:
         """Obtiene lista de dispositivos de entrada disponibles"""
         devices = []
         
-        for i in range(self.audio.get_device_count()):
-            device_info = self.audio.get_device_info_by_index(i)
-            if device_info['maxInputChannels'] > 0:
+        for i, device_info in enumerate(sd.query_devices()):
+            if device_info['max_input_channels'] > 0:
                 devices.append({
                     'index': i,
                     'name': device_info['name'],
-                    'channels': device_info['maxInputChannels'],
-                    'sample_rate': device_info['defaultSampleRate']
+                    'channels': device_info['max_input_channels'],
+                    'sample_rate': device_info['default_samplerate']
                 })
                 
         return devices
@@ -126,16 +117,7 @@ class MicrophoneCapture:
             self.stop_capture()
         
         # Configurar nuevo dispositivo
-        if self.stream:
-            self.stream = self.audio.open(
-                format=pyaudio.paFloat32,
-                channels=self.channels,
-                rate=self.sample_rate,
-                input=True,
-                input_device_index=device_index,
-                frames_per_buffer=self.buffer_size,
-                stream_callback=self._audio_callback
-            )
+        self.device_index = device_index
             
         if was_recording:
             self.start_capture()

@@ -71,7 +71,7 @@ El proyecto se desarrolla en **tres etapas progresivas**, cada una construyendo 
 - **Python 3.8+**: Lenguaje principal
 - **pygame**: Motor de juego y gráficos
 - **numpy**: Análisis matemático de audio
-- **pyaudio**: Captura de audio del micrófono
+- **sounddevice**: Captura de audio del micrófono
 - **scipy**: Procesamiento de señales (FFT)
 - **mido**: Manejo de archivos MIDI (Etapa 3)
 - **pretty_midi**: Análisis avanzado de MIDI (Etapa 3)
@@ -147,7 +147,7 @@ cd ukelele_hero
 # Instalar dependencias del sistema
 sudo apt update
 sudo apt install python3-pygame python3-numpy python3-scipy python3-matplotlib -y
-sudo apt install python3-pyaudio portaudio19-dev python3-mido -y
+sudo apt install portaudio19-dev python3-mido -y
 
 # Ejecutar el juego
 python3 main.py
@@ -278,7 +278,7 @@ Cannot connect to server socket err = No such file or directory
 **Solución**: Estos errores pueden ser ignorados, el juego funciona correctamente.
 
 ### Instalación
-Si encuentras problemas con `pyaudio`, asegúrate de instalar las dependencias del sistema:
+Si encuentras problemas con `sounddevice`, asegúrate de instalar las dependencias del sistema:
 ```bash
 sudo apt install portaudio19-dev python3-dev
 ```
@@ -310,7 +310,7 @@ Desarrollado con amor para la comunidad de músicos y programadores.
 **Tecnologías utilizadas:**
 - Python 3 + pygame para la interfaz
 - NumPy + SciPy para procesamiento de señales
-- PyAudio para captura de audio
+- sounddevice para captura de audio
 - FFT para análisis de frecuencia
 
 ---

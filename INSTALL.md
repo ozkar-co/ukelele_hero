@@ -11,7 +11,7 @@ sudo apt update && sudo apt upgrade -y
 # 2. Instalar dependencias del sistema
 sudo apt install python3 python3-dev python3-pip -y
 sudo apt install python3-pygame python3-numpy python3-scipy python3-matplotlib -y
-sudo apt install python3-pyaudio portaudio19-dev -y
+sudo apt install portaudio19-dev -y
 sudo apt install python3-mido -y
 
 # 3. Clonar el repositorio
@@ -117,8 +117,8 @@ detector.set_input_device(device_index)
 # Verificar instalación de pygame
 python3 -c "import pygame; print(pygame.version.ver)"
 
-# Verificar instalación de pyaudio
-python3 -c "import pyaudio; print('PyAudio OK')"
+# Verificar instalación de sounddevice
+python3 -c "import sounddevice; print('sounddevice OK')"
 ```
 
 #### No se detectan notas

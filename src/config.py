@@ -37,7 +37,7 @@ PYTHON_VERSION = "3.8+"
 DEPENDENCIES = [
     "pygame >= 2.5.0",
     "numpy >= 1.24.0", 
-    "pyaudio >= 0.2.11",
+    "sounddevice >= 0.4.5",
     "scipy >= 1.10.0",
     "mido >= 1.2.10"
 ]
