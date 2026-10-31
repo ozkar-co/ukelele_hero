@@ -21,7 +21,7 @@ make config
 
 **Expected Output:**
 ```
-pygame-ce 2.5.6 (SDL 2.32.10, Python 3.14.2)
+pygame-ce 2.5.8 (SDL 2.32.10, Python 3.13.5)
 [pygame window opens with menu]
 ```
 
@@ -52,10 +52,33 @@ pygame-ce 2.5.6 (SDL 2.32.10, Python 3.14.2)
 ### Tuner Mode
 | Key | Action |
 |-----|--------|
+| SPACE | Pause / resume detection |
 | ESC | Return to Menu |
 
 - Play any note on ukulele
 - Visual feedback shows tuning accuracy
+
+### Trainer Mode
+| Key | Action |
+|-----|--------|
+| SPACE | Skip current note |
+| R | Restart song |
+| ESC | Return to Menu |
+
+- The timeline stays frozen until the requested note is detected
+- The prompt shows the exact string and fret to play
+
+### Calibration Mode
+| Key | Action |
+|-----|--------|
+| SPACE | Retry current note |
+| ENTER | Skip current note / finish |
+| R | Restart calibration |
+| ESC | Cancel |
+
+- First measures room noise, then asks for 10 notes
+- Saves a new profile in `assets/calibration/`
+- The most recent profile loads automatically in every mode
 
 ## Available Tablatures
 
@@ -92,10 +115,10 @@ Notes travel horizontally from right to left. Hit them when they reach the gray 
 
 ### String Lanes
 ```
-G (Green)   ├─────────────────────────────────
-C (Blue)    ├─────────────────────────────────
-E (Red)     ├─────────────────────────────────
 A (Yellow)  ├─────────────────────────────────
+E (Red)     ├─────────────────────────────────
+C (Blue)    ├─────────────────────────────────
+G (Green)   ├─────────────────────────────────
             0%    25%   50%   75%   100% (Time)
 ```
 
@@ -169,6 +192,7 @@ ukelele_hero/
 │   ├── utils/               # Configuration & helpers
 │   └── config.py            # Game settings
 ├── assets/
+│   ├── calibration/         # Saved calibration profiles
 │   ├── midi/                # MIDI files
 │   └── tablatures/          # Saved tablatures (JSON)
 ├── tools/                   # Utility scripts

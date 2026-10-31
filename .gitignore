@@ -249,6 +249,9 @@ $RECYCLE.BIN/
 # Wheels de esta máquina/Python (make fetch); reconstruibles con red.
 wheelhouse/
 
+# Perfiles de calibración locales (micrófono y ruido de sala).
+assets/calibration/
+
 # Audio test files
 *.wav
 *.mp3

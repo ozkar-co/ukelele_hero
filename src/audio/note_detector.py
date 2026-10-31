@@ -12,27 +12,42 @@ if str(current_dir) not in sys.path:
 
 from audio.microphone import MicrophoneCapture
 from audio.frequency_analyzer import FrequencyAnalyzer
+from audio.profile_store import CalibrationProfileStore
 from utils.helpers import frequency_to_note, get_tuning_status
-from utils.config import MIN_VOLUME_THRESHOLD
+from utils.config import MIN_VOLUME_THRESHOLD, NOTE_TOLERANCE_CENTS
 import time
 
 
 class NoteDetector:
     """Detector de notas musicales en tiempo real"""
-    
-    def __init__(self):
+
+    def __init__(self, profile=None):
         self.microphone = MicrophoneCapture()
         self.analyzer = FrequencyAnalyzer()
-        
+
+        # Si no se indica un perfil, se usa el más reciente guardado.
+        if profile is None:
+            profile = CalibrationProfileStore().load_latest()
+        self.profile = profile or {}
+        thresholds = self.profile.get("thresholds", {})
+
+        self.min_volume_threshold = float(
+            thresholds.get("min_volume", MIN_VOLUME_THRESHOLD)
+        )
+        self.min_confidence = float(thresholds.get("min_confidence", 0.3))
+        self.note_tolerance_cents = float(
+            thresholds.get("note_tolerance_cents", NOTE_TOLERANCE_CENTS)
+        )
+        self.history_size = int(thresholds.get("history_size", 5))
+
         self.is_detecting = False
         self.current_note = None
         self.current_frequency = 0.0
         self.current_confidence = 0.0
         self.current_deviation = 0.0
-        
+
         # Filtros para suavizar detección
         self.detection_history = []
-        self.history_size = 5
         
     def start_detection(self):
         """Inicia la detección de notas"""
@@ -63,7 +78,7 @@ class NoteDetector:
         
         # Verificar volumen mínimo
         volume = self.microphone.get_volume_level()
-        if volume < MIN_VOLUME_THRESHOLD:
+        if volume < self.min_volume_threshold:
             self._reset_detection()
             return None
         
@@ -73,7 +88,7 @@ class NoteDetector:
         confidence = analysis['confidence']
         
         # Filtrar detecciones con baja confianza
-        if confidence < 0.3:  # Umbral ajustable
+        if confidence < self.min_confidence:
             self._reset_detection()
             return None
         
@@ -110,7 +125,9 @@ class NoteDetector:
                 'frequency': self.current_frequency,
                 'confidence': self.current_confidence,
                 'deviation': self.current_deviation,
-                'tuning_status': get_tuning_status(self.current_deviation),
+                'tuning_status': get_tuning_status(
+                    self.current_deviation, tolerance=self.note_tolerance_cents
+                ),
                 'volume': volume
             }
         
@@ -182,8 +199,10 @@ class NoteDetector:
             'frequency': self.current_frequency,
             'confidence': self.current_confidence,
             'deviation': self.current_deviation,
-            'tuning_status': get_tuning_status(self.current_deviation),
-            'is_in_tune': abs(self.current_deviation) <= 10  # 10 cents de tolerancia
+            'tuning_status': get_tuning_status(
+                self.current_deviation, tolerance=self.note_tolerance_cents
+            ),
+            'is_in_tune': abs(self.current_deviation) <= self.note_tolerance_cents
         }
     
     def calibrate_sensitivity(self, target_note, duration=5.0):

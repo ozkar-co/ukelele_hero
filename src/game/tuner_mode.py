@@ -297,10 +297,10 @@ class TunerMode:
         """Dibuja referencia técnica de las cuerdas del ukulele"""
         # Cuerdas del ukulele con información técnica extendida
         strings_info = [
-            ("4ª cuerda al aire", "G4", "392.0 Hz"),
-            ("3ª cuerda al aire", "C4", "261.6 Hz"),
-            ("2ª cuerda al aire", "E4", "329.6 Hz"),
             ("1ª cuerda al aire", "A4", "440.0 Hz"),
+            ("2ª cuerda al aire", "E4", "329.6 Hz"),
+            ("3ª cuerda al aire", "C4", "261.6 Hz"),
+            ("4ª cuerda al aire", "G4", "392.0 Hz"),
             ("", "", ""),  # Separador
             ("Rango extendido:", "", ""),
             ("Traste 12 (1ª)", "A5", "880.0 Hz"),

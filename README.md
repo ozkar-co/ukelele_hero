@@ -91,6 +91,7 @@ ukelele_hero/
 │   ├── music/                # MIDI y tablaturas
 │   └── utils/                # Configuración y helpers
 ├── assets/
+│   ├── calibration/          # Perfiles de calibración (locales)
 │   ├── midi/                 # Canciones MIDI
 │   └── tablatures/           # Tablaturas JSON
 ├── tools/                    # Utilidades de MIDI/tablaturas
@@ -150,24 +151,51 @@ La carpeta `dist/ukelele_hero/` se copia a otra máquina Linux con la misma
 arquitectura. No hace falta Python ni las dependencias, pero PortAudio debe
 estar instalado en el sistema destino. `assets/` queda junto al ejecutable.
 
-### Uso Actual - Etapa 1: Detector de Notas
+### Uso Actual
 1. Ejecuta `.venv/bin/python main.py`
-2. Selecciona "1. Detector de Notas (Etapa 1)" en el menú
-3. Toca una cuerda del ukulele cerca del micrófono
-4. Analiza las métricas de detección para calibración:
-   - **Nota detectada**: Muestra la nota musical identificada
-   - **Frecuencia exacta**: Valor en Hz para análisis técnico
-   - **Confianza**: Porcentaje de certeza en la detección
-   - **Desviación**: Diferencia en cents respecto a la frecuencia teórica
-   - **Volumen**: Nivel de entrada del micrófono
+2. Elige una opción del menú:
+   - **Modo Juego**: tablatura con puntuación y detección en tiempo real.
+   - **Entrenador**: la canción espera a que toques la nota indicada.
+   - **Detector de Notas**: afinador y análisis en tiempo real.
+   - **Calibrar Micrófono**: mide el silencio y varias notas para ajustar los umbrales.
+3. En el detector, toca una cuerda del ukulele cerca del micrófono y analiza:
+   - **Nota detectada**: nota musical identificada
+   - **Frecuencia exacta**: valor en Hz para análisis técnico
+   - **Confianza**: porcentaje de certeza en la detección
+   - **Desviación**: diferencia en cents respecto a la frecuencia teórica
+   - **Volumen**: nivel de entrada del micrófono
+
+### Calibración del micrófono
+
+La opción **Calibrar Micrófono** mide primero el ruido de sala y después
+pide diez notas indicando cuerda y traste. Con esas muestras calcula:
+
+- `min_volume`: umbral de volumen por encima del ruido ambiente.
+- `min_confidence`: confianza mínima observada en tus notas.
+- `note_tolerance_cents`: tolerancia de afinación según la desviación medida.
+
+Cada calibración se guarda como un JSON nuevo en `assets/calibration/`.
+No se sobrescriben perfiles anteriores. Al abrir cualquier modo se carga
+automáticamente el perfil más reciente. Los perfiles son datos locales y
+están excluidos de git.
+
+### Entrenador
+
+El **Entrenador** muestra la tablatura y congela la línea de tiempo en la
+nota actual. La canción avanza cuando detecta la nota pedida. Muestra la
+cuerda y el traste correctos para cada nota.
+
+- **ESPACIO**: saltar la nota actual.
+- **R**: reiniciar la canción.
+- **ESC**: volver al menú.
 
 ## Controles
 
-- **Espacio**: Pausar/Reanudar
+- **Espacio**: Pausar/Reanudar (juego) o saltar nota (entrenador)
 - **ESC**: Menú principal
 - **Enter**: Confirmar selección
 - **Flechas**: Navegación en menús
-- **R**: Reiniciar nivel actual
+- **R**: Reiniciar nivel o entrenamiento
 
 ## Configuración
 

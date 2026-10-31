@@ -21,7 +21,8 @@ class TablatureGameMode:
     """Modo juego con tablaturas - notas desplazándose horizontalmente"""
     
     # Configuración de layout
-    STRINGS = ['G', 'C', 'E', 'A']
+    # Orden visual de la tablatura: A arriba, G abajo.
+    STRINGS = ['A', 'E', 'C', 'G']
     STRING_COLORS = {
         'G': (255, 100, 100),  # Rojo
         'C': (100, 255, 100),  # Verde
@@ -164,8 +165,11 @@ class TablatureGameMode:
         self.misses = 0
         self.current_time = 0.0
         self.start_time = pygame.time.get_ticks() / 1000.0
-        
-        self.run()
+
+        try:
+            self.run()
+        finally:
+            self.stop()
         return True
     
     def stop(self):

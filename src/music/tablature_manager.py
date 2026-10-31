@@ -7,6 +7,8 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 
+from .ukelele import pitch_to_string_fret
+
 
 class TablatureManager:
     """Gestiona el guardado y carga de tablaturas configuradas"""
@@ -182,9 +184,11 @@ class TablatureManager:
         for note in notes:
             pitch = note["pitch"]
             note_name = note["note_name"]
-            fret = self._get_fret(pitch)
-            string = self._get_string(pitch)
-            
+            string, fret = pitch_to_string_fret(pitch)
+            if string is None:
+                print(f"⚠️ Nota fuera del ukulele: {note_name}")
+                continue
+
             # Add 1 second offset for initial silence before gameplay starts
             start_time = note["start_time"] + 1.0
             end_time = note["end_time"] + 1.0
@@ -215,34 +219,3 @@ class TablatureManager:
         octave = (pitch // 12) - 1
         note_index = pitch % 12
         return f"{note_names[note_index]}{octave}"
-    
-    @staticmethod
-    def _get_string(pitch: int) -> str:
-        """Determina la cuerda para un pitch"""
-        # Afinación GCEA: G4=67, C4=60, E4=64, A4=69
-        strings_tuning = {
-            'G': 67,
-            'C': 60,
-            'E': 64,
-            'A': 69
-        }
-        
-        # Encontrar la cuerda más cercana
-        min_diff = float('inf')
-        closest_string = 'A'
-        
-        for string_name, base_pitch in strings_tuning.items():
-            # Comparar dentro del mismo rango de octavas
-            distance = abs(pitch - base_pitch)
-            if distance < min_diff:
-                min_diff = distance
-                closest_string = string_name
-        
-        return closest_string
-    
-    @staticmethod
-    def _get_fret(pitch: int) -> int:
-        """Calcula el traste para un pitch"""
-        # Usar C4 como referencia (cuerda C, traste 0)
-        base_pitch = 60  # C4
-        return pitch - base_pitch

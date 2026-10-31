@@ -19,7 +19,7 @@ class StringFretDisplay:
     """Visual display of ukulele strings with fret positions"""
     
     # Ukulele configuration
-    STRINGS = ['G', 'C', 'E', 'A']
+    STRINGS = ['A', 'E', 'C', 'G']
     STRING_MIDI_NOTES = {
         'G': 67,  # G4
         'C': 60,  # C4
