@@ -14,6 +14,7 @@ sys.path.insert(0, str(project_root))
 from audio.note_detector import NoteDetector
 from game.ui.styles import HIT_WINDOW_SECONDS, STRING_ORDER
 from game.ui.tablature_view import TablatureView
+from game.ui.theme import Theme
 from utils.config import *
 from music.tablature_manager import TablatureManager
 
@@ -66,6 +67,7 @@ class TablatureGameMode:
         
         # Vista compartida de cuerdas y notas
         self.view = TablatureView(screen)
+        self.theme = Theme()
 
         # Validación de notas y feedback visual
         self.last_detection = None
@@ -282,7 +284,10 @@ class TablatureGameMode:
     
     def _render(self):
         """Renderiza la pantalla"""
-        self.screen.fill(BACKGROUND_COLOR)
+        if not self.theme.draw_background(
+            self.screen, "backgrounds/game.png", dim=110
+        ):
+            self.screen.fill(BACKGROUND_COLOR)
         self._render_header()
         self.view.draw(self.active_notes, self.current_time)
         self._render_hud()
@@ -298,11 +303,23 @@ class TablatureGameMode:
             f"{self.current_tablature['tempo']} BPM | "
             f"{self.current_time:.1f}s"
         )
-        header_surface = self.font_medium.render(header_text, True, TEXT_COLOR)
-        self.screen.blit(header_surface, (20, 10))
+        self.theme.draw_text(
+            self.screen,
+            header_text,
+            self.font_medium,
+            TEXT_COLOR,
+            topleft=(20, 10),
+        )
 
     def _render_hud(self):
         """Renderiza la información del HUD (puntuación, combo, etc)"""
+        self.theme.draw_scrim(
+            self.screen,
+            pygame.Rect(0, WINDOW_HEIGHT - 170, WINDOW_WIDTH, 170),
+            alpha=145,
+            color=(8, 18, 22),
+        )
+
         # Mostrar countdown si está activo
         if self.countdown_active:
             # Mostrar números 3, 2, 1 basados en current_time
@@ -355,9 +372,13 @@ class TablatureGameMode:
             pause_rect = pause_surface.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
             self.screen.blit(pause_surface, pause_rect)
         else:
-            instructions = "ESPACIO=Pausa | ESC=Salir"
-            inst_surface = self.font_small.render(instructions, True, (150, 150, 150))
-            self.screen.blit(inst_surface, (20, WINDOW_HEIGHT - 25))
+            self.theme.draw_text(
+                self.screen,
+                "ESPACIO=Pausa | ESC=Salir",
+                self.font_small,
+                (190, 200, 195),
+                center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 14),
+            )
     
     def _on_note_hit(self, note, abs_time_error, signed_time_error):
         """Se ejecuta cuando se golpea una nota correctamente"""

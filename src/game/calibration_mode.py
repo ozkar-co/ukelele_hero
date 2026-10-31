@@ -22,6 +22,7 @@ from audio.calibration import build_profile, summarize_note
 from audio.frequency_analyzer import FrequencyAnalyzer
 from audio.microphone import MicrophoneCapture
 from audio.profile_store import CalibrationProfileStore
+from game.ui.theme import Theme
 from music.ukelele import pitch_to_note_name, string_fret_to_pitch
 from utils.config import (
     BACKGROUND_COLOR,
@@ -72,6 +73,7 @@ class CalibrationMode:
         self.microphone = MicrophoneCapture()
         self.analyzer = FrequencyAnalyzer()
         self.store = CalibrationProfileStore()
+        self.theme = Theme()
 
         self.font_huge = pygame.font.Font(None, 96)
         self.font_large = pygame.font.Font(None, FONT_XLARGE)
@@ -278,13 +280,24 @@ class CalibrationMode:
         return {"index": index, "name": name}
 
     def _draw(self):
-        self.screen.fill(BACKGROUND_COLOR)
+        if not self.theme.draw_background(
+            self.screen, "backgrounds/menu.png", dim=95
+        ):
+            self.screen.fill(BACKGROUND_COLOR)
 
-        title = self.font_large.render(
-            "CALIBRACION DE MICROFONO", True, HIGHLIGHT_COLOR
+        self.theme.draw_panel(
+            self.screen, pygame.Rect(40, 75, 944, 670), alpha=235
         )
-        title_rect = title.get_rect(center=(WINDOW_WIDTH // 2, 50))
-        self.screen.blit(title, title_rect)
+        self.theme.draw_text(
+            self.screen,
+            "CALIBRACION DE MICROFONO",
+            self.font_large,
+            HIGHLIGHT_COLOR,
+            center=(WINDOW_WIDTH // 2, 50),
+        )
+        self.theme.draw_icon(
+            self.screen, "icons/ukulele.png", (100, 50), 48
+        )
 
         if self.step == 0:
             self._draw_silence()
@@ -417,8 +430,6 @@ class CalibrationMode:
         )
 
     def _draw_results(self):
-        self._draw_step_label("Calibracion terminada")
-
         if self.saved_path:
             headline = self.font_large.render("Perfil guardado", True, SUCCESS_COLOR)
             detail = self.font_small.render(self.saved_path.name, True, TEXT_COLOR)
@@ -499,7 +510,7 @@ class CalibrationMode:
         self.screen.blit(text, (x, y + height + 8))
 
     def _draw_instructions(self, lines):
-        y = WINDOW_HEIGHT - 30 - (len(lines) - 1) * 22
+        y = WINDOW_HEIGHT - 45 - (len(lines) - 1) * 22
         for line in lines:
             text = self.font_small.render(line, True, (160, 160, 160))
             self.screen.blit(

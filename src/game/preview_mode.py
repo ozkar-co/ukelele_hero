@@ -20,6 +20,7 @@ if str(current_dir) not in sys.path:
 
 from game.ui.styles import STRING_ORDER
 from game.ui.tablature_view import TablatureView
+from game.ui.theme import Theme
 from music.tablature_manager import TablatureManager
 from music.ukelele import pitch_to_string_fret
 from utils.config import (
@@ -44,6 +45,7 @@ class PreviewMode:
         self.clock = pygame.time.Clock()
         self.manager = TablatureManager()
         self.view = TablatureView(screen)
+        self.theme = Theme()
 
         self.font_large = pygame.font.Font(None, 48)
         self.font_medium = pygame.font.Font(None, 36)
@@ -232,18 +234,36 @@ class PreviewMode:
             return None
 
     def _render(self):
-        self.screen.fill(BACKGROUND_COLOR)
+        if not self.theme.draw_background(
+            self.screen, "backgrounds/game.png", dim=110
+        ):
+            self.screen.fill(BACKGROUND_COLOR)
 
         header = (
             f"ESCUCHA | {self.source} | {self.variant} | "
             f"{self.tempo:.0f} BPM | {self.current_time:.1f}s"
         )
-        header_surface = self.font_medium.render(header, True, TEXT_COLOR)
-        self.screen.blit(header_surface, (20, 10))
+        self.theme.draw_scrim(
+            self.screen, pygame.Rect(0, 0, WINDOW_WIDTH, 46), alpha=145
+        )
+        self.theme.draw_text(
+            self.screen, header, self.font_medium, TEXT_COLOR, topleft=(20, 10)
+        )
 
         self.view.draw(self.notes, self.current_time)
 
+        self.theme.draw_scrim(
+            self.screen,
+            pygame.Rect(0, WINDOW_HEIGHT - 90, WINDOW_WIDTH, 90),
+            alpha=145,
+        )
+
         if self.finished:
+            self.theme.draw_panel(
+                self.screen,
+                pygame.Rect(WINDOW_WIDTH // 2 - 240, WINDOW_HEIGHT // 2 - 90, 480, 180),
+                alpha=235,
+            )
             message = self.font_large.render("FIN", True, SUCCESS_COLOR)
             self.screen.blit(
                 message, message.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
@@ -255,6 +275,11 @@ class PreviewMode:
                 hint, hint.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 50))
             )
         elif self.paused:
+            self.theme.draw_panel(
+                self.screen,
+                pygame.Rect(WINDOW_WIDTH // 2 - 200, WINDOW_HEIGHT // 2 - 70, 400, 140),
+                alpha=235,
+            )
             message = self.font_large.render("PAUSA", True, HIGHLIGHT_COLOR)
             self.screen.blit(
                 message, message.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))

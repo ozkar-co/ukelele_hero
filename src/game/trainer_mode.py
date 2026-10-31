@@ -42,6 +42,7 @@ class TrainerMode(TablatureGameMode):
         self.skipped_notes = 0
         self.current_detection = None
         self.status_message = ""
+        self.font_prompt = pygame.font.Font(None, 54)
         self.match_streak = 0
         self.gap_seen = True
         self.last_accepted_pitch = None
@@ -233,13 +234,26 @@ class TrainerMode(TablatureGameMode):
             f"ENTRENADOR | {self.current_tablature['source']} | "
             f"{position}/{total} | {self.current_tablature['tempo']} BPM"
         )
-        surface = self.font_medium.render(header, True, TEXT_COLOR)
-        self.screen.blit(surface, (20, 10))
+        self.theme.draw_text(
+            self.screen, header, self.font_medium, TEXT_COLOR, topleft=(20, 10)
+        )
+        self.theme.draw_text(
+            self.screen,
+            "ESPACIO: saltar | R: reiniciar | ESC: salir",
+            self.font_small,
+            (190, 200, 195),
+            topleft=(WINDOW_WIDTH - 370, 45),
+        )
 
     def _render_hud(self):
         target = self._current_note()
 
         if self.finished:
+            self.theme.draw_panel(
+                self.screen,
+                pygame.Rect(WINDOW_WIDTH // 2 - 350, 180, 700, 230),
+                alpha=235,
+            )
             message = self.font_large.render(
                 "Cancion completada", True, SUCCESS_COLOR
             )
@@ -262,12 +276,18 @@ class TrainerMode(TablatureGameMode):
             )
             return
 
+        self.theme.draw_panel(
+            self.screen,
+            pygame.Rect(45, 560, 934, 195),
+            alpha=235,
+        )
+
         if target:
-            prompt = self.font_large.render(
+            prompt = self.font_prompt.render(
                 f"Toca {target['note']}", True, HIGHLIGHT_COLOR
             )
             self.screen.blit(
-                prompt, prompt.get_rect(center=(WINDOW_WIDTH // 2, 595))
+                prompt, prompt.get_rect(center=(WINDOW_WIDTH // 2, 615))
             )
 
             position = self.font_medium.render(
@@ -276,7 +296,7 @@ class TrainerMode(TablatureGameMode):
                 TEXT_COLOR,
             )
             self.screen.blit(
-                position, position.get_rect(center=(WINDOW_WIDTH // 2, 642))
+                position, position.get_rect(center=(WINDOW_WIDTH // 2, 655))
             )
 
             if self.current_detection:
@@ -294,7 +314,7 @@ class TrainerMode(TablatureGameMode):
             status_surface = self.font_medium.render(status, True, color)
             self.screen.blit(
                 status_surface,
-                status_surface.get_rect(center=(WINDOW_WIDTH // 2, 675)),
+                status_surface.get_rect(center=(WINDOW_WIDTH // 2, 688)),
             )
 
             self.view.draw_target(target["string"])
@@ -305,8 +325,4 @@ class TrainerMode(TablatureGameMode):
             True,
             TEXT_COLOR,
         )
-        self.screen.blit(progress, (20, WINDOW_HEIGHT - 70))
-
-        instructions = "ESPACIO: saltar nota | R: reiniciar | ESC: salir"
-        inst = self.font_small.render(instructions, True, (150, 150, 150))
-        self.screen.blit(inst, (20, WINDOW_HEIGHT - 35))
+        self.screen.blit(progress, (70, WINDOW_HEIGHT - 58))

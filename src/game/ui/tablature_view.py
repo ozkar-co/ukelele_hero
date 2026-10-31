@@ -17,6 +17,7 @@ if str(current_dir) not in sys.path:
 
 from game.ui.styles import (
     HIT_ZONE_COLOR,
+    HIT_ZONE_FILL_ALPHA,
     HIT_ZONE_LINE_COLOR,
     HIT_ZONE_WIDTH,
     HIT_ZONE_X,
@@ -87,18 +88,22 @@ class TablatureView:
             )
 
     def draw_hit_zone(self):
+        fill = pygame.Surface(
+            (HIT_ZONE_WIDTH, WINDOW_HEIGHT - 160), pygame.SRCALPHA
+        )
+        fill.fill((*HIT_ZONE_COLOR, HIT_ZONE_FILL_ALPHA))
+        self.screen.blit(fill, (HIT_ZONE_X, 80))
+
+        line = pygame.Surface(
+            (HIT_ZONE_WIDTH, WINDOW_HEIGHT - 160), pygame.SRCALPHA
+        )
         pygame.draw.rect(
-            self.screen,
-            HIT_ZONE_COLOR,
-            (HIT_ZONE_X, 80, HIT_ZONE_WIDTH, WINDOW_HEIGHT - 160),
+            line,
+            (*HIT_ZONE_LINE_COLOR, 110),
+            (0, 0, HIT_ZONE_WIDTH, WINDOW_HEIGHT - 160),
+            2,
         )
-        pygame.draw.line(
-            self.screen,
-            HIT_ZONE_LINE_COLOR,
-            (HIT_ZONE_X, 80),
-            (HIT_ZONE_X, WINDOW_HEIGHT - 80),
-            3,
-        )
+        self.screen.blit(line, (HIT_ZONE_X, 80))
 
     def draw_notes(self, notes, current_time):
         for note in notes:

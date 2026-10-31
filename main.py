@@ -18,6 +18,7 @@ from game.preview_mode import PreviewMode
 from game.tablature_mode import TablatureGameMode
 from game.trainer_mode import TrainerMode
 from game.tuner_mode import TunerMode
+from game.ui.theme import Theme
 from music.tablature_manager import TablatureManager
 from utils.config import BACKGROUND_COLOR, FPS, TEXT_COLOR, WINDOW_HEIGHT, WINDOW_WIDTH
 
@@ -35,6 +36,7 @@ class GameMenu:
 
         self.manager = TablatureManager()
         self.profile = CalibrationProfileStore().load_latest()
+        self.theme = Theme()
 
     def show_main_menu(self):
         """Muestra el menú principal"""
@@ -50,17 +52,42 @@ class GameMenu:
         ]
 
         while running:
-            self.screen.fill(BACKGROUND_COLOR)
+            if not self.theme.draw_background(
+                self.screen, "backgrounds/menu.png", dim=25
+            ):
+                self.screen.fill(BACKGROUND_COLOR)
 
-            title = self.font_huge.render("UKULELE HERO", True, (255, 100, 100))
-            title_rect = title.get_rect(center=(WINDOW_WIDTH // 2, 50))
-            self.screen.blit(title, title_rect)
+            self.theme.draw_banner(
+                self.screen, pygame.Rect(WINDOW_WIDTH // 2 - 330, 18, 660, 104)
+            )
+            self.theme.draw_text(
+                self.screen,
+                "UKULELE HERO",
+                self.font_huge,
+                (255, 100, 100),
+                center=(WINDOW_WIDTH // 2, 58),
+            )
+            self.theme.draw_icon(
+                self.screen, "icons/ukulele.png", (95, 100), 92
+            )
+            self.theme.draw_icon(
+                self.screen, "icons/note.png", (930, 100), 44
+            )
+            self.theme.draw_icon(
+                self.screen, "icons/sparkle.png", (872, 158), 26
+            )
 
             for idx, option in enumerate(options):
-                color = (255, 255, 100) if idx == selected else TEXT_COLOR
-                text = self.font_large.render(option, True, color)
-                text_rect = text.get_rect(center=(WINDOW_WIDTH // 2, 180 + idx * 70))
-                self.screen.blit(text, text_rect)
+                rect = pygame.Rect(
+                    WINDOW_WIDTH // 2 - 230, 160 + idx * 74, 460, 62
+                )
+                self.theme.draw_button(
+                    self.screen,
+                    rect,
+                    option,
+                    self.font_large,
+                    selected=(idx == selected),
+                )
 
             if self.profile:
                 thresholds = self.profile.get("thresholds", {})
@@ -72,19 +99,27 @@ class GameMenu:
                 )
             else:
                 profile_text = "Sin perfil de calibracion: valores por defecto"
-            profile_surface = self.font_small.render(
-                profile_text, True, (150, 150, 150)
-            )
-            self.screen.blit(
-                profile_surface,
-                profile_surface.get_rect(center=(WINDOW_WIDTH // 2, 590)),
-            )
 
-            instr = self.font_medium.render(
-                "[FLECHAS]: Navegar | [ENTER]: Seleccionar", True, (150, 150, 150)
+            self.theme.draw_scrim(
+                self.screen,
+                pygame.Rect(WINDOW_WIDTH // 2 - 340, 606, 680, 34),
+                alpha=170,
+                color=(10, 25, 30),
             )
-            instr_rect = instr.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 50))
-            self.screen.blit(instr, instr_rect)
+            self.theme.draw_text(
+                self.screen,
+                profile_text,
+                self.font_small,
+                (190, 200, 195),
+                center=(WINDOW_WIDTH // 2, 623),
+            )
+            self.theme.draw_text(
+                self.screen,
+                "[FLECHAS]: Navegar | [ENTER]: Seleccionar",
+                self.font_medium,
+                (190, 200, 195),
+                center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 45),
+            )
 
             pygame.display.flip()
 
@@ -115,26 +150,75 @@ class GameMenu:
 
         running = True
         selected = 0
+        scroll = 0
+        visible_rows = 8
 
         while running:
-            self.screen.fill(BACKGROUND_COLOR)
+            if selected < scroll:
+                scroll = selected
+            elif selected >= scroll + visible_rows:
+                scroll = selected - visible_rows + 1
 
-            title_surface = self.font_large.render(title, True, TEXT_COLOR)
-            title_rect = title_surface.get_rect(center=(WINDOW_WIDTH // 2, 40))
-            self.screen.blit(title_surface, title_rect)
+            if not self.theme.draw_background(
+                self.screen, "backgrounds/menu.png", dim=60
+            ):
+                self.screen.fill(BACKGROUND_COLOR)
 
-            for idx, tab_name in enumerate(tablatures):
-                color = (255, 255, 100) if idx == selected else TEXT_COLOR
-                text = self.font_medium.render(f"  {tab_name}", True, color)
-                self.screen.blit(text, (50, 120 + idx * 50))
-
-            instr = self.font_medium.render(
-                "[FLECHAS]: Navegar | [ENTER]: Seleccionar | [ESC]: Atrás",
-                True,
-                (150, 150, 150),
+            self.theme.draw_panel(
+                self.screen, pygame.Rect(60, 80, 904, 600), alpha=238
             )
-            instr_rect = instr.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 50))
-            self.screen.blit(instr, instr_rect)
+            self.theme.draw_banner(
+                self.screen, pygame.Rect(WINDOW_WIDTH // 2 - 330, 10, 660, 84)
+            )
+            self.theme.draw_text(
+                self.screen,
+                title,
+                self.font_large,
+                (255, 210, 120),
+                center=(WINDOW_WIDTH // 2, 52),
+            )
+            self.theme.draw_icon(
+                self.screen, "icons/note.png", (WINDOW_WIDTH - 110, 115), 38
+            )
+
+            for row, idx in enumerate(range(scroll, min(len(tablatures), scroll + visible_rows))):
+                tab_name = tablatures[idx]
+                row_y = 130 + row * 54
+                is_selected = idx == selected
+
+                if is_selected:
+                    self.theme.draw_scrim(
+                        self.screen,
+                        pygame.Rect(90, row_y - 4, 844, 44),
+                        alpha=150,
+                        color=(70, 55, 25),
+                    )
+                    self.theme.draw_icon(
+                        self.screen, "icons/sparkle.png", (116, row_y + 18), 22
+                    )
+
+                self.theme.draw_text(
+                    self.screen,
+                    tab_name[:72],
+                    self.font_small,
+                    (255, 220, 120) if is_selected else TEXT_COLOR,
+                    topleft=(140, row_y + 6),
+                )
+
+            self.theme.draw_text(
+                self.screen,
+                f"{selected + 1}/{len(tablatures)}",
+                self.font_small,
+                (190, 200, 195),
+                center=(WINDOW_WIDTH // 2, 645),
+            )
+            self.theme.draw_text(
+                self.screen,
+                "[FLECHAS]: Navegar | [ENTER]: Seleccionar | [ESC]: Atras",
+                self.font_medium,
+                (190, 200, 195),
+                center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 50),
+            )
 
             pygame.display.flip()
 

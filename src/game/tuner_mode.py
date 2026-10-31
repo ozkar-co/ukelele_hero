@@ -14,6 +14,7 @@ if str(current_dir) not in sys.path:
 
 from audio.note_detector import NoteDetector
 from game.ui.string_fret_display import StringFretDisplay
+from game.ui.theme import Theme
 from utils.config import *
 from utils.helpers import format_frequency, format_cents
 
@@ -29,7 +30,8 @@ class TunerMode:
         self.note_detector = NoteDetector()
         
         # String/Fret display
-        self.string_fret_display = StringFretDisplay(screen)
+        self.string_fret_display = StringFretDisplay(screen, y=110)
+        self.theme = Theme()
         
         # Fuentes
         self.font_huge = pygame.font.Font(None, 96)
@@ -119,19 +121,30 @@ class TunerMode:
     
     def _draw(self):
         """Dibuja la interfaz del afinador"""
-        # Fondo
-        self.screen.fill(BACKGROUND_COLOR)
-        
-        # Título
-        title_text = self.font_large.render("DETECTOR DE NOTAS", True, HIGHLIGHT_COLOR)
-        title_rect = title_text.get_rect(center=(WINDOW_WIDTH // 2, 80))
-        self.screen.blit(title_text, title_rect)
+        if not self.theme.draw_background(
+            self.screen, "backgrounds/menu.png", dim=100
+        ):
+            self.screen.fill(BACKGROUND_COLOR)
+
+        self.theme.draw_panel(
+            self.screen, pygame.Rect(25, 50, 974, 670), alpha=235
+        )
+        self.theme.draw_text(
+            self.screen,
+            "DETECTOR DE NOTAS",
+            self.font_large,
+            HIGHLIGHT_COLOR,
+            center=(WINDOW_WIDTH // 2, 112),
+        )
+        self.theme.draw_icon(
+            self.screen, "icons/ukulele.png", (95, 112), 46
+        )
         
         # Estado de detección
         status_color = SUCCESS_COLOR if self.note_detector.is_detecting else ERROR_COLOR
         status_text = "[DETECTANDO]" if self.note_detector.is_detecting else "[PAUSADO]"
         status_surface = self.font_medium.render(status_text, True, status_color)
-        status_rect = status_surface.get_rect(center=(WINDOW_WIDTH // 2, 120))
+        status_rect = status_surface.get_rect(center=(WINDOW_WIDTH // 2, 150))
         self.screen.blit(status_surface, status_rect)
         
         if self.current_detection:

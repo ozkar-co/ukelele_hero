@@ -56,8 +56,8 @@ class StringFretDisplay:
         self.width = width
         
         # Fonts
-        self.font_fret = pygame.font.Font(None, 18)
-        self.font_label = pygame.font.Font(None, 16)
+        self.font_fret = pygame.font.Font(None, 22)
+        self.font_label = pygame.font.Font(None, 20)
         
         # Current detected note
         self.detected_pitch = None

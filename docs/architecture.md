@@ -10,7 +10,7 @@ src/
     ui/                  Componentes visuales y estilos compartidos
   music/                 MIDI, tablaturas, afinación y simplificación
   utils/                 Configuración y helpers
-assets/                  MIDI, tablaturas y perfiles de calibración
+assets/                  MIDI, tablaturas, perfiles e imágenes pixel art
 tools/                   Generador de tablaturas (herramienta de depuración)
 tests/                   Tests unitarios
 docs/                    Documentación
@@ -30,6 +30,12 @@ componente; no duplicar estilos en los modos.
 
 `StringFretDisplay` reutiliza los colores y el orden de cuerdas de `styles.py`
 para el panel de trastes del afinador.
+
+`src/game/ui/theme.py` carga fondos, paneles, botones e iconos desde
+`assets/images/`. Los botones y paneles se dibujan con 9-slice para que el
+marco no se deforme. Si falta un asset, el modo cae en los colores planos.
+Las imágenes se generaron con Genkit; prompts y seeds están en
+`assets/images/README.md`.
 
 ## Audio
 
