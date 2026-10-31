@@ -14,6 +14,7 @@ sys.path.insert(0, str(project_root / "src"))
 
 from audio.profile_store import CalibrationProfileStore
 from game.calibration_mode import CalibrationMode
+from game.preview_mode import PreviewMode
 from game.tablature_mode import TablatureGameMode
 from game.trainer_mode import TrainerMode
 from game.tuner_mode import TunerMode
@@ -42,6 +43,7 @@ class GameMenu:
         options = [
             "Modo Juego",
             "Entrenador",
+            "Escuchar Cancion",
             "Detector de Notas",
             "Calibrar Microfono",
             "Salir",
@@ -188,16 +190,25 @@ def main():
                 if trainer.load_tablature(tab_name):
                     trainer.start()
 
-        elif choice == 2:  # Detector de Notas
+        elif choice == 2:  # Escuchar canción
+            tab_name = menu.show_tablature_select("Escuchar: elige una cancion")
+
+            if tab_name:
+                preview = PreviewMode(screen)
+
+                if preview.load_tablature(tab_name):
+                    preview.start()
+
+        elif choice == 3:  # Detector de Notas
             tuner = TunerMode(screen)
             tuner.start()
 
-        elif choice == 3:  # Calibrar micrófono
+        elif choice == 4:  # Calibrar micrófono
             calibration = CalibrationMode(screen)
             calibration.start()
             menu.profile = CalibrationProfileStore().load_latest()
 
-        elif choice == 4:  # Salir
+        elif choice == 5:  # Salir
             break
 
     pygame.quit()

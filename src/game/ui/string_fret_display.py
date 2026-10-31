@@ -12,6 +12,7 @@ current_dir = Path(__file__).parent.parent.parent
 if str(current_dir) not in sys.path:
     sys.path.insert(0, str(current_dir))
 
+from game.ui.styles import STRING_COLORS, STRING_ORDER
 from utils.config import *
 
 
@@ -19,19 +20,13 @@ class StringFretDisplay:
     """Visual display of ukulele strings with fret positions"""
     
     # Ukulele configuration
-    STRINGS = ['A', 'E', 'C', 'G']
+    STRINGS = STRING_ORDER
+    STRING_COLORS = STRING_COLORS
     STRING_MIDI_NOTES = {
         'G': 67,  # G4
         'C': 60,  # C4
         'E': 64,  # E4
         'A': 69,  # A4
-    }
-    
-    STRING_COLORS = {
-        'G': (100, 200, 100),  # Green
-        'C': (100, 150, 255),  # Blue
-        'E': (255, 100, 100),  # Red
-        'A': (255, 255, 100),  # Yellow
     }
     
     # Visual configuration

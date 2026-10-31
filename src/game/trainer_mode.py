@@ -135,16 +135,9 @@ class TrainerMode(TablatureGameMode):
         return None
 
     def _sync_time(self):
-        """Congela el tiempo en la nota actual y recoloca todas las notas."""
+        """Congela el tiempo en la nota actual."""
         current = self._current_note()
         self.current_time = current["start_time"] if current else 0.0
-
-        for note in self.active_notes:
-            note["x"] = (
-                self.HIT_ZONE_X
-                + (note["start_time"] - self.current_time)
-                * self.NOTE_SPEED_PIXELS_PER_SECOND
-            )
 
     def _handle_events(self):
         for event in pygame.event.get():
@@ -304,14 +297,7 @@ class TrainerMode(TablatureGameMode):
                 status_surface.get_rect(center=(WINDOW_WIDTH // 2, 675)),
             )
 
-            y = self.string_y_positions[target["string"]]
-            pygame.draw.circle(
-                self.screen,
-                TEXT_COLOR,
-                (self.HIT_ZONE_X + self.NOTE_WIDTH // 2, y),
-                34,
-                2,
-            )
+            self.view.draw_target(target["string"])
 
         progress = self.font_small.render(
             f"Nota {self.current_index + 1}/{len(self.notes)} | "

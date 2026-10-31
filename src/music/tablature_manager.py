@@ -38,7 +38,8 @@ class TablatureManager:
                       notes: List[Tuple[int, float, float]],
                       octaves_transposed: int = 0,
                       tempo: float = 120,
-                      metadata: Dict = None) -> str:
+                      metadata: Dict = None,
+                      variant: str = None) -> str:
         """
         Guarda una tablatura configurada
         
@@ -49,12 +50,15 @@ class TablatureManager:
             octaves_transposed (int): Octavas transponidas
             tempo (float): Tempo en BPM
             metadata (Dict): Datos adicionales
+            variant (str): Sufijo de variante, por ejemplo 'easy' o 'normal'
             
         Returns:
             str: Nombre del archivo guardado
         """
         # Crear nombre de archivo
         tab_name = f"{midi_filename}_track{track_index}_oct{octaves_transposed:+d}"
+        if variant:
+            tab_name += f"_{variant}"
         tab_filename = f"{tab_name}.json"
         tab_path = self.tablature_folder / tab_filename
         

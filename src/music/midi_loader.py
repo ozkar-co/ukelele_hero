@@ -8,13 +8,19 @@ from pathlib import Path
 import pretty_midi
 from typing import Optional, List, Tuple, Dict
 
+from .ukelele import pitch_to_string_fret
+
 
 class MIDILoader:
     """Carga y parsea archivos MIDI"""
-    
-    # Rango de notas MIDI para ukulele (típicamente C3 a E6)
+
+    # Rango para cargar notas y rango realmente tocable en GCEA.
     UKULELE_MIN_NOTE = 36  # C2
     UKULELE_MAX_NOTE = 88  # E6
+    PLAYABLE_MIN_NOTE = 60  # C4, cuerda C al aire
+    PLAYABLE_MAX_NOTE = 88  # E6
+    MAX_FRET = 20
+    HIGH_FRET = 8
     
     def __init__(self, midi_folder: str = None):
         """
@@ -211,37 +217,64 @@ class MIDILoader:
     
     def adjust_to_ukulele_range(self, notes: List[Tuple[int, float, float]]) -> Tuple[List[Tuple[int, float, float]], int]:
         """
-        Ajusta automáticamente notas al rango del ukulele
-        
-        Args:
-            notes (List[Tuple[int, float, float]]): Lista de (pitch, start_time, end_time)
-            
-        Returns:
-            Tuple: (notas_ajustadas, octavas_transponidas)
+        Elige la octava que deja más notas y onsets tocables, con trastes cómodos.
+
+        Prueba 0, -1, +1, -2 y +2 octavas. Devuelve solo las notas que caben
+        en el ukulele (C4-E6 y trastes 0-20). En empate prefiere no transponer.
         """
-        min_note, max_note = self.get_notes_range(notes)
-        
-        # Rango típico del ukulele soprano: C4 (60) a E6 (88)
-        uke_min = 60  # C4
-        uke_max = 88  # E6
-        
-        octaves_needed = 0
-        adjusted_notes = notes
-        
-        # Si las notas están todas demasiado bajas
-        if max_note < uke_min:
-            while max(pitch for pitch, _, _ in adjusted_notes) < uke_min:
-                octaves_needed += 1
-                adjusted_notes = self.transpose_notes(adjusted_notes, 1)
-        
-        # Si las notas están todas demasiado altas
-        elif min_note > uke_max:
-            while min(pitch for pitch, _, _ in adjusted_notes) > uke_max:
-                octaves_needed -= 1
-                adjusted_notes = self.transpose_notes(adjusted_notes, -1)
-        
-        return adjusted_notes, octaves_needed
-    
+        if not notes:
+            return [], 0
+
+        best_notes = []
+        best_shift = 0
+        best_score = float("-inf")
+
+        for shift in (0, -1, 1, -2, 2):
+            shifted = self.transpose_notes(notes, shift)
+            playable, score = self._score_octave(notes, shifted)
+            if score > best_score + 1e-9:
+                best_score = score
+                best_notes = playable
+                best_shift = shift
+
+        return best_notes, best_shift
+
+    def _score_octave(self, original_notes, shifted_notes):
+        """Puntúa una octava por cobertura, notas tocables y comodidad."""
+        playable = []
+        frets = []
+
+        for note in shifted_notes:
+            pitch, _start, _end = note
+            if not (self.PLAYABLE_MIN_NOTE <= pitch <= self.PLAYABLE_MAX_NOTE):
+                continue
+            string_name, fret = pitch_to_string_fret(pitch, self.MAX_FRET)
+            if string_name is None:
+                continue
+            playable.append(note)
+            frets.append(fret)
+
+        if not playable:
+            return [], float("-inf")
+
+        original_onsets = {round(start, 2) for _, start, _ in original_notes}
+        playable_onsets = {round(start, 2) for _, start, _ in playable}
+        onset_coverage = (
+            len(original_onsets & playable_onsets) / len(original_onsets)
+            if original_onsets else 0.0
+        )
+        note_ratio = len(playable) / len(original_notes)
+        median_fret = sorted(frets)[len(frets) // 2]
+        high_fret_ratio = sum(fret >= self.HIGH_FRET for fret in frets) / len(frets)
+
+        score = (
+            (0.45 * onset_coverage)
+            + (0.35 * note_ratio)
+            - (0.03 * median_fret)
+            - (0.20 * high_fret_ratio)
+        )
+        return playable, score
+
     @staticmethod
     def trim_silence(notes: List[Tuple[int, float, float]], 
                      silence_threshold: float = 0.5) -> List[Tuple[int, float, float]]:

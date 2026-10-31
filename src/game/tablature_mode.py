@@ -12,31 +12,16 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from audio.note_detector import NoteDetector
+from game.ui.styles import HIT_WINDOW_SECONDS, STRING_ORDER
+from game.ui.tablature_view import TablatureView
 from utils.config import *
-from utils.helpers import format_frequency
 from music.tablature_manager import TablatureManager
 
 
 class TablatureGameMode:
     """Modo juego con tablaturas - notas desplazándose horizontalmente"""
-    
-    # Configuración de layout
-    # Orden visual de la tablatura: A arriba, G abajo.
-    STRINGS = ['A', 'E', 'C', 'G']
-    STRING_COLORS = {
-        'G': (255, 100, 100),  # Rojo
-        'C': (100, 255, 100),  # Verde
-        'E': (100, 100, 255),  # Azul
-        'A': (255, 255, 100),  # Amarillo
-    }
-    
-    HIT_ZONE_X = 150  # X donde las notas deben tocarse (izquierda)
-    HIT_ZONE_WIDTH = 40  # Ancho de la zona de golpeo
-    HIT_ZONE_MARGIN = 100  # Margen de error en pixels
-    
-    NOTE_WIDTH = 30  # Ancho de las notas
-    NOTE_HEIGHT = 50  # Alto fijo de las notas (rectángulos)
-    NOTE_SPEED_PIXELS_PER_SECOND = 400  # Velocidad en pixels/segundo
+
+    STRINGS = STRING_ORDER
     
     def __init__(self, screen):
         self.screen = screen
@@ -78,19 +63,17 @@ class TablatureGameMode:
         self.font_medium = pygame.font.Font(None, 36)
         self.font_small = pygame.font.Font(None, 24)
         self.font_countdown = pygame.font.Font(None, 150)
-        self.font_fret = pygame.font.Font(None, 40)
         
-        # Cálculos de layout
-        self._calculate_layout()
-    
-    def _calculate_layout(self):
-        """Calcula posiciones de las 4 cuerdas"""
-        self.string_y_positions = {}
-        self.string_height = (WINDOW_HEIGHT - 200) // len(self.STRINGS)
-        
-        for idx, string_name in enumerate(self.STRINGS):
-            y = 100 + (idx * self.string_height)
-            self.string_y_positions[string_name] = y
+        # Vista compartida de cuerdas y notas
+        self.view = TablatureView(screen)
+
+        # Validación de notas y feedback visual
+        self.last_detection = None
+        self.feedback_text = ""
+        self.feedback_color = TEXT_COLOR
+        self.feedback_until = 0.0
+        self._last_hit_pitch = None
+        self._gap_since_hit = True
     
     def load_tablature(self, tablature_name: str) -> bool:
         """
@@ -113,11 +96,18 @@ class TablatureGameMode:
         
         # Convertir a formato UI
         self.current_tablature = self.tab_manager.export_to_ui_format(tab_data)
-        
+
+        playable_notes = sum(
+            len(notes) for notes in self.current_tablature['strings'].values()
+        )
+        if playable_notes == 0:
+            print("[ERROR] La tablatura no tiene notas tocables en el ukulele")
+            return False
+
         # Preparar notas
         self._prepare_notes()
-        
-        print(f"[OK] Tablatura cargada: {self.current_tablature['total_notes']} notas")
+
+        print(f"[OK] Tablatura cargada: {playable_notes} notas")
         return True
     
     def _prepare_notes(self):
@@ -144,6 +134,7 @@ class TablatureGameMode:
         
         # Control de pausa
         self.pause_start_time = None  # Momento en que se pausó
+
     def start(self):
         """Inicia el modo juego"""
         if not self.current_tablature:
@@ -151,7 +142,10 @@ class TablatureGameMode:
             return False
         
         print("[GAME] Iniciando modo juego...")
-        
+
+        # Reiniciar las notas por si se vuelve a iniciar el mismo modo
+        self._prepare_notes()
+
         # Iniciar detector de notas
         if not self.note_detector.start_detection():
             print("⚠️ No se pudo iniciar detección de audio, continuando sin validación")
@@ -161,10 +155,16 @@ class TablatureGameMode:
         self.countdown_remaining = 3.0
         self.score = 0
         self.combo = 0
+        self.max_combo = 0
         self.hits = 0
         self.misses = 0
         self.current_time = 0.0
         self.start_time = pygame.time.get_ticks() / 1000.0
+        self.last_detection = None
+        self.feedback_text = ""
+        self.feedback_until = 0.0
+        self._last_hit_pitch = None
+        self._gap_since_hit = True
 
         try:
             self.run()
@@ -214,147 +214,93 @@ class TablatureGameMode:
         """Actualiza la lógica del juego"""
         if self.game_paused:
             return
-        
+
         # Calcular tiempo según si estamos en countdown o en juego
         elapsed = (pygame.time.get_ticks() / 1000.0) - self.start_time
-        
+
         if self.countdown_active:
-            # Durante countdown: current_time es NEGATIVO
-            # Countdown: -4 a -1 (4 segundos de espera antes de 0)
             self.current_time = elapsed - self.pre_game_total
-            
+
             if elapsed >= self.pre_game_total:
-                # Countdown terminó, pasar a juego real
                 self.countdown_active = False
                 self.start_time = pygame.time.get_ticks() / 1000.0
                 self.current_time = 0.0
+            return
+
+        self.current_time = elapsed
+
+        # Validar la nota que está sonando contra las notas de la zona de golpeo
+        detection = self.note_detector.update()
+        self.last_detection = detection
+        if detection is None:
+            self._gap_since_hit = True
         else:
-            # Durante juego: current_time avanza desde 0
-            self.current_time = elapsed
-        
-        # Actualizar posición de todas las notas
+            self._try_hit(detection)
+
+        # Las notas que pasan su ventana sin ser tocadas cuentan como fallo
+        remaining = []
         for note in self.active_notes:
-            time_until_hit = note['start_time'] - self.current_time
-            pixels_until_hit = time_until_hit * self.NOTE_SPEED_PIXELS_PER_SECOND
-            note['x'] = self.HIT_ZONE_X + pixels_until_hit
-            
-            # Detectar misses solo en juego real (no durante countdown)
-            if not self.countdown_active and self.current_time > note['end_time']:
-                if note not in getattr(self, '_hit_notes', []):
-                    self._on_note_miss(note)
-                if note in self.active_notes:
-                    self.active_notes.remove(note)
-        
-        # Verificar fin del juego
-        if not self.countdown_active and self.active_notes:
-            last_note_end = self.active_notes[-1]['end_time']
+            if self.current_time > note['start_time'] + HIT_WINDOW_SECONDS:
+                self._on_note_miss(note)
+            else:
+                remaining.append(note)
+        self.active_notes = remaining
+
+        if not self.active_notes and self.upcoming_notes:
+            last_note_end = self.upcoming_notes[-1]['end_time']
             if self.current_time > last_note_end:
-                # Remover notas que pasaron
-                self.active_notes = [n for n in self.active_notes if self.current_time <= n['end_time']]
-        
-        if not self.countdown_active and not self.active_notes and self.upcoming_notes:
-            if self.current_time > (self.upcoming_notes[-1]['end_time'] if self.upcoming_notes else 0):
                 self._on_game_end()
+
+    def _try_hit(self, detection):
+        """Busca una nota de la zona de golpeo que coincida con la detección."""
+        detected_note = detection.get('note')
+        if not detected_note:
+            return
+
+        candidates = [
+            note for note in self.active_notes
+            if note['note'] == detected_note
+            and abs(self.current_time - note['start_time']) <= HIT_WINDOW_SECONDS
+        ]
+        if not candidates:
+            return
+
+        note = min(
+            candidates,
+            key=lambda candidate: abs(self.current_time - candidate['start_time']),
+        )
+
+        # Evitar que una nota sostenida acierte dos notas seguidas del mismo pitch.
+        if note['pitch'] == self._last_hit_pitch and not self._gap_since_hit:
+            return
+
+        time_error = self.current_time - note['start_time']
+        self._on_note_hit(note, abs(time_error), time_error)
+        self._last_hit_pitch = note['pitch']
+        self._gap_since_hit = False
+        self.active_notes.remove(note)
     
     def _render(self):
         """Renderiza la pantalla"""
         self.screen.fill(BACKGROUND_COLOR)
-        
-        # Título y estado
         self._render_header()
-        
-        # Líneas de cuerdas
-        self._render_strings()
-        
-        # Zona de golpeo
-        self._render_hit_zone()
-        
-        # Notas activas
-        self._render_notes()
-        
-        # HUD (Información)
+        self.view.draw(self.active_notes, self.current_time)
         self._render_hud()
-        
         pygame.display.flip()
-    
+
     def _render_header(self):
         """Renderiza el encabezado con información"""
-        if self.current_tablature:
-            source = self.current_tablature['source']
-            tempo = self.current_tablature['tempo']
-            
-            header_text = f"{source} | {tempo} BPM | {self.current_time:.1f}s"
-            header_surface = self.font_medium.render(header_text, True, TEXT_COLOR)
-            self.screen.blit(header_surface, (20, 10))
-    
-    def _render_strings(self):
-        """Renderiza las 4 líneas de cuerdas"""
-        for string_name, y in self.string_y_positions.items():
-            color = self.STRING_COLORS[string_name]
-            
-            # Nombre de la cuerda
-            string_label = self.font_large.render(string_name, True, color)
-            self.screen.blit(string_label, (20, y - 20))
-            
-            # Línea de la cuerda
-            pygame.draw.line(
-                self.screen, 
-                color, 
-                (self.HIT_ZONE_X + self.HIT_ZONE_WIDTH, y),
-                (WINDOW_WIDTH, y),
-                2
-            )
-    
-    def _render_hit_zone(self):
-        """Renderiza la zona de golpeo en la izquierda"""
-        # Rectángulo de la zona
-        pygame.draw.rect(
-            self.screen,
-            (200, 200, 200),
-            (self.HIT_ZONE_X, 80, self.HIT_ZONE_WIDTH, WINDOW_HEIGHT - 160)
+        if not self.current_tablature:
+            return
+
+        header_text = (
+            f"{self.current_tablature['source']} | "
+            f"{self.current_tablature['tempo']} BPM | "
+            f"{self.current_time:.1f}s"
         )
-        
-        # Línea de referencia
-        pygame.draw.line(
-            self.screen,
-            (255, 255, 255),
-            (self.HIT_ZONE_X, 80),
-            (self.HIT_ZONE_X, WINDOW_HEIGHT - 80),
-            3
-        )
-    
-    def _render_notes(self):
-        """Renderiza las notas activas"""
-        for note in self.active_notes:
-            x = note.get('x', WINDOW_WIDTH + 100)
-            y = self.string_y_positions[note['string']]
-            
-            # No renderizar notas muy fuera de pantalla
-            if x < -self.NOTE_WIDTH or x > WINDOW_WIDTH:
-                continue
-            
-            color = self.STRING_COLORS[note['string']]
-            
-            # Dibuja la nota como un rectángulo de tamaño fijo
-            pygame.draw.rect(
-                self.screen,
-                color,
-                (x, y - self.NOTE_HEIGHT // 2, self.NOTE_WIDTH, self.NOTE_HEIGHT)
-            )
-            
-            # Borde más oscuro
-            pygame.draw.rect(
-                self.screen,
-                tuple(c // 2 for c in color),
-                (x, y - self.NOTE_HEIGHT // 2, self.NOTE_WIDTH, self.NOTE_HEIGHT),
-                2
-            )
-            
-            # Número de traste
-            fret_text = self.font_fret.render(str(note['fret']), True, (0, 0, 0))
-            fret_rect = fret_text.get_rect(center=(x + self.NOTE_WIDTH // 2, y))
-            self.screen.blit(fret_text, fret_rect)
-    
+        header_surface = self.font_medium.render(header_text, True, TEXT_COLOR)
+        self.screen.blit(header_surface, (20, 10))
+
     def _render_hud(self):
         """Renderiza la información del HUD (puntuación, combo, etc)"""
         # Mostrar countdown si está activo
@@ -385,7 +331,23 @@ class TablatureGameMode:
         stats_text = f"Hits: {self.hits} | Misses: {self.misses}"
         stats_surface = self.font_small.render(stats_text, True, TEXT_COLOR)
         self.screen.blit(stats_surface, (WINDOW_WIDTH - 300, hud_y))
-        
+
+        detected_text = (
+            f"Escucho: {self.last_detection['note']}"
+            if self.last_detection else "Escucho: -"
+        )
+        detected_surface = self.font_small.render(detected_text, True, TEXT_COLOR)
+        self.screen.blit(detected_surface, (WINDOW_WIDTH - 300, hud_y + 35))
+
+        if self.feedback_text and pygame.time.get_ticks() / 1000.0 < self.feedback_until:
+            feedback_surface = self.font_large.render(
+                self.feedback_text, True, self.feedback_color
+            )
+            feedback_rect = feedback_surface.get_rect(
+                center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 130)
+            )
+            self.screen.blit(feedback_surface, feedback_rect)
+
         # Instrucciones
         if self.game_paused:
             pause_text = "PAUSA - Presiona ESPACIO para continuar"
@@ -397,49 +359,56 @@ class TablatureGameMode:
             inst_surface = self.font_small.render(instructions, True, (150, 150, 150))
             self.screen.blit(inst_surface, (20, WINDOW_HEIGHT - 25))
     
-    def _on_note_hit(self, note, time_error):
+    def _on_note_hit(self, note, abs_time_error, signed_time_error):
         """Se ejecuta cuando se golpea una nota correctamente"""
-        # Calcular puntos basado en precisión
-        if time_error < 0.05:  # Perfecto
+        if abs_time_error < 0.05:
             points = 1000
             feedback = "PERFECT!"
             feedback_color = (0, 255, 0)
-        elif time_error < 0.1:  # Bien
+        elif abs_time_error < 0.1:
             points = 500
             feedback = "GOOD!"
             feedback_color = (100, 255, 100)
-        else:  # Ok
+        else:
             points = 100
             feedback = "OK"
             feedback_color = (255, 255, 100)
-        
+
         self.score += points
         self.combo += 1
         self.hits += 1
         self.max_combo = max(self.max_combo, self.combo)
-        
-        # Marcar nota como golpeada
-        if not hasattr(self, '_hit_notes'):
-            self._hit_notes = []
-        self._hit_notes.append(note)
-        
-        print(f"[HIT] {feedback} | +{points} pts | Combo: {self.combo}")
-    
+
+        self.feedback_text = feedback
+        self.feedback_color = feedback_color
+        self.feedback_until = pygame.time.get_ticks() / 1000.0 + 0.6
+
+        print(
+            f"[HIT] {feedback} | {signed_time_error:+.3f}s | "
+            f"+{points} pts | Combo: {self.combo}"
+        )
+
     def _on_note_miss(self, note):
         """Se ejecuta cuando se pierde una nota"""
         self.misses += 1
         self.combo = 0
+        self.feedback_text = "MISS"
+        self.feedback_color = (255, 100, 100)
+        self.feedback_until = pygame.time.get_ticks() / 1000.0 + 0.5
         print(f"[MISS] Traste {note['fret']} en cuerda {note['string']}")
-    
+
     def _on_game_end(self):
         """Se ejecuta cuando el juego termina"""
         self.is_running = False
-        
-        print("\n" + "="*60)
+
+        total = self.hits + self.misses
+        precision = (self.hits / total * 100) if total else 0.0
+
+        print("\n" + "=" * 60)
         print("[GAME END]")
-        print("="*60)
+        print("=" * 60)
         print(f"Score Final: {self.score}")
-        print(f"Combo Máximo: {self.max_combo}")
+        print(f"Combo Maximo: {self.max_combo}")
         print(f"Notas Correctas: {self.hits}")
         print(f"Notas Perdidas: {self.misses}")
-        print(f"Precisión: {(self.hits / (self.hits + self.misses) * 100):.1f}%")
+        print(f"Precision: {precision:.1f}%")

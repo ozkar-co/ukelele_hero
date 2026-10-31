@@ -1,5 +1,11 @@
 """
-Herramienta para crear y guardar tablaturas configuradas
+Generador de tablaturas del juego (herramienta de depuración).
+
+Genera archivos separados por variante, por ejemplo:
+    cancion_track0_oct+1_normal.json
+    cancion_track0_oct+1_easy.json
+
+La variante easy es monofónica y se apoya en src/music/simplifier.py.
 """
 
 import sys
@@ -10,156 +16,138 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root / "src"))
 
 from music.midi_loader import MIDILoader
+from music.simplifier import filter_playable, metrics, simplify_easy
 from music.tablature_manager import TablatureManager
 
 
+def _choose_variants():
+    while True:
+        answer = input(
+            "\nVariantes a generar: [ambas/normal/easy] (ambas): "
+        ).strip().lower()
+        if answer in ("", "ambas", "a"):
+            return {"normal", "easy"}
+        if answer in ("normal", "n"):
+            return {"normal"}
+        if answer in ("easy", "e"):
+            return {"easy"}
+        print("Opcion invalida")
+
+
 def main():
-    """Herramienta interactiva para crear tablaturas guardadas"""
-    
-    print("\n" + "="*60)
-    print("[TABLATURE CREATOR] CREADOR DE TABLATURAS GUARDADAS")
-    print("="*60 + "\n")
-    
-    # Inicializar
+    print("\n" + "=" * 60)
+    print("[TABLATURE CREATOR] GENERADOR DE TABLATURAS")
+    print("=" * 60 + "\n")
+
     loader = MIDILoader()
     manager = TablatureManager()
-    
-    # Listar archivos MIDI
+
     midi_files = loader.get_midi_files()
-    
     if not midi_files:
-        print("❌ No hay archivos MIDI disponibles")
+        print("No hay archivos MIDI en assets/midi/")
         return
-    
-    print("📁 Archivos MIDI disponibles:")
-    for idx, filename in enumerate(midi_files, 1):
-        print(f"   {idx}. {filename}")
-    
-    # Seleccionar MIDI
+
+    print("Archivos MIDI disponibles:")
+    for index, filename in enumerate(midi_files, 1):
+        print(f"  {index}. {filename}")
+
     while True:
         try:
-            choice = input("\n🎵 Selecciona un archivo (1-{}): ".format(len(midi_files))).strip()
-            choice = int(choice)
+            choice = int(input("\nSelecciona un archivo: ").strip())
             if 1 <= choice <= len(midi_files):
                 midi_file = midi_files[choice - 1]
                 break
         except ValueError:
             pass
-        print("❌ Opción inválida")
-    
-    # Cargar MIDI
+        print("Opcion invalida")
+
     midi = loader.load_midi(midi_file)
     if not midi:
         return
-    
-    # Mostrar pistas
+
     tracks_info = loader.get_track_info(midi)
-    print("\n📋 Pistas disponibles:")
+    print("\nPistas disponibles:")
     for info in tracks_info:
-        print(f"   {info['index']}. {info['name']} ({info['note_count']} notas)")
-    
-    # Seleccionar pista
+        print(f"  {info['index']}. {info['name']} ({info['note_count']} notas)")
+
     while True:
         try:
-            track = input(f"\n🎹 Selecciona pista (0-{len(tracks_info)-1}): ").strip()
-            track = int(track)
+            track = int(input("\nSelecciona pista: ").strip())
             if 0 <= track < len(tracks_info):
                 break
         except ValueError:
             pass
-        print("❌ Opción inválida")
-    
-    # Extraer notas
-    print(f"\n⏳ Procesando pista {track}...")
+        print("Opcion invalida")
+
     notes = loader.get_track_notes(midi, track)
-    
-    if not notes:
-        print("❌ No hay notas en esta pista")
-        return
-    
-    # Eliminar silencios al inicio y final
-    print("🔇 Eliminando silencios del inicio y final...")
     notes = loader.trim_silence(notes)
-    print(f"✅ Silencios eliminados")
-    
-    # Mostrar rango
-    min_note, max_note = loader.get_notes_range(notes)
-    min_name = loader.midi_note_to_name(min_note)
-    max_name = loader.midi_note_to_name(max_note)
-    
-    print(f"✅ Notas encontradas: {len(notes)}")
-    print(f"Rango: {min_name} ({min_note}) a {max_name} ({max_note})")
-    
-    # Transposición
-    print("\n" + "="*60)
-    print("🎼 TRANSPOSICIÓN")
-    print("="*60)
-    print("Rango ukulele: C4 (60) a E6 (88)")
-    
-    octaves = None
-    while True:
-        try:
-            oct_input = input("\n🎵 Octavas a transponer (-2 a +2, o auto): ").strip().lower()
-            if oct_input == "auto":
-                notes, octaves = loader.adjust_to_ukulele_range(notes)
-                print(f"✅ Auto-ajustado: {octaves:+d} octava(s)")
-                break
-            else:
-                octaves = int(oct_input)
-                if -2 <= octaves <= 2:
-                    if octaves != 0:
-                        notes = loader.transpose_notes(notes, octaves)
-                        print(f"✅ Transponido: {octaves:+d} octava(s)")
-                    break
-        except ValueError:
-            pass
-        print("❌ Entrada inválida")
-    
-    # Mostrar nuevo rango
-    min_note, max_note = loader.get_notes_range(notes)
-    min_name = loader.midi_note_to_name(min_note)
-    max_name = loader.midi_note_to_name(max_note)
-    print(f"Rango final: {min_name} ({min_note}) a {max_name} ({max_note})")
-    
-    # Guardar tablatura
-    print("\n" + "="*60)
-    print("💾 GUARDANDO TABLATURA")
-    print("="*60)
-    
-    # Metadata personalizada
-    description = input("\n📝 Descripción (opcional): ").strip()
-    
-    metadata = {
+    if not notes:
+        print("La pista no tiene notas")
+        return
+
+    tempo = midi.get_tempo_changes()[1][0] if midi.get_tempo_changes()[1].size else 120.0
+    source_notes = len(notes)
+
+    print("\nAjustando octava automaticamente...")
+    notes, octaves = loader.adjust_to_ukulele_range(notes)
+    if not notes:
+        print("No quedaron notas tocables en el ukulele")
+        return
+
+    normal_metrics = metrics(notes)
+    print(f"Octava elegida: {octaves:+d}")
+    print(f"Notas tocables: {len(notes)}/{source_notes}")
+    print(f"Traste mediano: {normal_metrics['median_fret']} | "
+          f"maximo: {normal_metrics['max_fret']}")
+
+    variants = _choose_variants()
+    description = input("\nDescripcion (opcional): ").strip()
+
+    metadata_base = {
         "description": description,
-        "created_by": "MIDI Tool"
+        "created_by": "MIDI Tool",
+        "source_notes": source_notes,
+        "octaves_transposed": octaves,
     }
-    
-    # Guardar
-    filename = manager.save_tablature(
-        midi_filename=midi_file,
-        track_index=track,
-        notes=notes,
-        octaves_transposed=octaves,
-        tempo=120,
-        metadata=metadata
-    )
-    
-    print(f"\n✅ ¡Tablatura guardada exitosamente!")
-    print(f"Archivo: {filename}")
-    
-    # Mostrar preview
-    show_preview = input("\n¿Ver preview de datos? (s/n): ").strip().lower()
-    
-    if show_preview == 's':
-        print("\n" + "="*60)
-        print("PREVIEW - Datos para UI")
-        print("="*60 + "\n")
-        
-        tab_data = manager.load_tablature(filename)
-        ui_data = manager.export_to_ui_format(tab_data)
-        
-        import json
-        print(json.dumps(ui_data, indent=2, ensure_ascii=False))
+
+    if "normal" in variants:
+        filename = manager.save_tablature(
+            midi_filename=midi_file,
+            track_index=track,
+            notes=notes,
+            octaves_transposed=octaves,
+            tempo=tempo,
+            variant="normal",
+            metadata={
+                **metadata_base,
+                "preset": "normal",
+                "playable_metrics": normal_metrics,
+            },
+        )
+        print(f"Variante normal: {filename}")
+
+    if "easy" in variants:
+        easy_notes = simplify_easy(notes, tempo, subdivision=1.0)
+        easy_notes = filter_playable(easy_notes)
+        if not easy_notes:
+            print("La variante easy quedo vacia; no se guardo")
+        else:
+            easy_metrics = metrics(easy_notes)
+            filename = manager.save_tablature(
+                midi_filename=midi_file,
+                track_index=track,
+                notes=easy_notes,
+                octaves_transposed=octaves,
+                tempo=tempo,
+                variant="easy",
+                metadata={
+                    **metadata_base,
+                    "preset": "easy",
+                    "playable_metrics": easy_metrics,
+                    "processing": "skyline + remove_valleys + limit_to_beat",
+                },
+            )
+            print(f"Variante easy: {filename}")
 
 
 if __name__ == "__main__":

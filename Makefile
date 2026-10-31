@@ -46,5 +46,6 @@ dist:
 		--specpath build/pyi \
 		main.py
 	cp -a assets dist/$(APP)/assets
+	cp -a docs dist/$(APP)/docs
 	cp README.md dist/$(APP)/README.md
 	@echo "Bundle: dist/$(APP)/  (ejecutar ./$(APP)/$(APP))"
