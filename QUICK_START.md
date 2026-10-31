@@ -3,17 +3,20 @@
 ## Installation & Setup
 
 ### Prerequisites
-- Python 3.14+
-- Virtual environment (already created: `venv/`)
+- Python 3.10+
+- PortAudio (`sudo apt install portaudio19-dev`)
 
 ### Run the Game
 
 ```bash
 # Navigate to project directory
-cd c:\Users\oscar\Documents\Code\ukelele_hero
+cd ukelele_hero
+
+# Create .venv and install from wheelhouse/
+make config
 
 # Run the game
-./venv/Scripts/python.exe game_main.py
+.venv/bin/python main.py
 ```
 
 **Expected Output:**
@@ -100,7 +103,7 @@ A (Yellow)  ├─────────────────────�
 
 ### Method 1: Interactive Tool
 ```bash
-./venv/Scripts/python.exe tools/create_tablature.py
+.venv/bin/python tools/create_tablature.py
 ```
 
 Follow prompts to:
@@ -112,7 +115,7 @@ Follow prompts to:
 
 ### Method 2: Direct MIDI Processing
 ```bash
-./venv/Scripts/python.exe tools/midi_tool.py path/to/midi.mid --track 0 --transpose auto
+.venv/bin/python tools/midi_tool.py path/to/midi.mid --track 0 --transpose auto
 ```
 
 New tablatures save to `assets/tablatures/` automatically.
@@ -122,12 +125,10 @@ New tablatures save to `assets/tablatures/` automatically.
 ### Game Won't Start
 ```bash
 # Verify dependencies
-./venv/Scripts/python.exe -m pip list
+.venv/bin/python -m pip list
 
 # Check python version
-./venv/Scripts/python.exe --version
-
-# Expected: Python 3.14.x
+.venv/bin/python --version
 ```
 
 ### No Audio Detection
@@ -138,7 +139,7 @@ New tablatures save to `assets/tablatures/` automatically.
 ### Tablatures Not Showing
 ```bash
 # Check available tablatures
-./venv/Scripts/python.exe test_game_execution.py
+.venv/bin/python test_game_execution.py
 
 # Should list files in assets/tablatures/
 ```
@@ -160,7 +161,7 @@ New tablatures save to `assets/tablatures/` automatically.
 
 ```
 ukelele_hero/
-├── game_main.py              # Entry point
+├── main.py                   # Entry point
 ├── src/
 │   ├── audio/               # Audio processing
 │   ├── game/                # Game modes
@@ -172,7 +173,7 @@ ukelele_hero/
 │   └── tablatures/          # Saved tablatures (JSON)
 ├── tools/                   # Utility scripts
 ├── tests/                   # Test files
-└── venv/                    # Python virtual environment
+└── .venv/                   # Python virtual environment
 ```
 
 ## Configuration
@@ -208,7 +209,7 @@ STRING_COLORS = {
 
 ### Check Game Status
 ```bash
-./venv/Scripts/python.exe test_game_execution.py
+.venv/bin/python test_game_execution.py
 ```
 
 ### View Game Documentation
@@ -217,7 +218,7 @@ See [GAME_STATUS.md](GAME_STATUS.md) for detailed system information
 ### Test Individual Components
 ```bash
 # Test MIDI loading
-./venv/Scripts/python.exe tools/test_tablature.py
+.venv/bin/python tools/test_tablature.py
 
 # Test audio detection
 python -c "from src.audio.note_detector import NoteDetector; print('Audio OK')"
@@ -233,4 +234,4 @@ python -c "from src.audio.note_detector import NoteDetector; print('Audio OK')"
 
 ---
 
-**Ready to play? Run `game_main.py` and select "Modo Juego"!** 🎸🎵
+**Ready to play? Run `main.py` and select "Modo Juego"!** 🎸🎵

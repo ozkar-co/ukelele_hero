@@ -3,6 +3,7 @@ Cargador de archivos MIDI para extraer información de pistas
 """
 
 import os
+import sys
 from pathlib import Path
 import pretty_midi
 from typing import Optional, List, Tuple, Dict
@@ -25,7 +26,11 @@ class MIDILoader:
         """
         if midi_folder is None:
             # Usar carpeta assets/midi por defecto
-            project_root = Path(__file__).parent.parent.parent
+            if getattr(sys, "frozen", False):
+                # En el bundle, assets/ vive junto al ejecutable.
+                project_root = Path(sys.executable).resolve().parent
+            else:
+                project_root = Path(__file__).parent.parent.parent
             midi_folder = project_root / "assets" / "midi"
         
         self.midi_folder = Path(midi_folder)

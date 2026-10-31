@@ -45,5 +45,5 @@ if tablatures:
         traceback.print_exc()
 
 print("\n" + "=" * 60)
-print("Game Ready! Use game_main.py to launch the UI")
+print("Game Ready! Use main.py to launch the UI")
 print("=" * 60)

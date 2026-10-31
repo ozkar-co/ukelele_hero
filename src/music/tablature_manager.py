@@ -3,6 +3,7 @@ Gestor de tablaturas - Serialización y almacenamiento
 """
 
 import json
+import sys
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 
@@ -19,7 +20,11 @@ class TablatureManager:
                                    Por defecto, usa assets/tablatures
         """
         if tablature_folder is None:
-            project_root = Path(__file__).parent.parent.parent
+            if getattr(sys, "frozen", False):
+                # En el bundle, assets/ vive junto al ejecutable.
+                project_root = Path(sys.executable).resolve().parent
+            else:
+                project_root = Path(__file__).parent.parent.parent
             tablature_folder = project_root / "assets" / "tablatures"
         
         self.tablature_folder = Path(tablature_folder)

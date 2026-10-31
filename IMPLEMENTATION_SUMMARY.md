@@ -29,7 +29,7 @@ The complete Ukulele Hero game UI has been successfully implemented, tested, and
   - Frequency analysis with FFT
   - Visual tuning feedback
 
-#### 3. **Menu System** - Full Game Navigation (game_main.py)
+#### 3. **Menu System** - Full Game Navigation (main.py)
 - Main menu with 3 options
 - Tablature selection interface
 - Game flow orchestration
@@ -53,7 +53,7 @@ The complete Ukulele Hero game UI has been successfully implemented, tested, and
 
 **Solution Implemented:**
 - Changed 8 files to use absolute imports with sys.path configuration
-- Verified import chain: game_main → tablature_mode → audio modules → config
+- Verified import chain: main → tablature_mode → audio modules → config
 - All imports now functional and cross-platform compatible
 
 **Files Modified:**
@@ -63,7 +63,7 @@ The complete Ukulele Hero game UI has been successfully implemented, tested, and
 4. src/game/tablature_mode.py
 5. src/game/tuner_mode.py
 6. src/game/ui/screens.py
-7. game_main.py
+7. main.py
 
 ### System Verification Results
 
@@ -109,7 +109,7 @@ Miss (> 250ms error):     0 points
 
 ```bash
 cd c:\Users\oscar\Documents\Code\ukelele_hero
-./venv/Scripts/python.exe game_main.py
+.venv/bin/python main.py
 ```
 
 **Start Playing:**
@@ -122,7 +122,7 @@ cd c:\Users\oscar\Documents\Code\ukelele_hero
 ### Architecture Diagram
 
 ```
-game_main.py (Entry Point)
+main.py (Entry Point)
     ↓
 [GameMenu]
     ├─→ Modo Juego
@@ -204,7 +204,7 @@ UKULELE_STRINGS = {
 - Menu navigation
 
 ✅ **Integration Tests**
-- game_main.py execution
+- main.py execution
 - Menu to tablature selection flow
 - Audio module initialization
 - Pygame rendering pipeline
@@ -227,7 +227,7 @@ UKULELE_STRINGS = {
 ### Files Created/Modified Summary
 
 **New Game Files:**
-- game_main.py - Entry point (175 lines)
+- main.py - Entry point (175 lines)
 - src/game/tablature_mode.py - Game logic (426 lines)
 - GAME_STATUS.md - Detailed status report
 - QUICK_START.md - User guide
@@ -306,7 +306,7 @@ The Ukulele Hero game is **fully implemented and ready for play**. All core syst
 - ✅ Menu navigation
 - ✅ Scoring system
 
-**To play:** Run `game_main.py`, select "Modo Juego", choose a tablature, and start hitting notes!
+**To play:** Run `main.py`, select "Modo Juego", choose a tablature, and start hitting notes!
 
 ---
 

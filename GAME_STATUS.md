@@ -13,10 +13,10 @@
   - `src/game/tablature_mode.py`
   - `src/game/tuner_mode.py`
   - `src/game/ui/screens.py`
-  - `game_main.py`
+  - `main.py`
 
 **Color Configuration**
-- Fixed `BG_COLOR` → `BACKGROUND_COLOR` references in game_main.py
+- Fixed `BG_COLOR` → `BACKGROUND_COLOR` references in main.py
 - All pygame rendering now uses correct config from `utils.config`
 
 ### Current System Status
@@ -61,7 +61,7 @@ TABLATURE MANAGER:
    - Visual tuning feedback
    - Microphone integration ready
 
-3. **Main Menu System** (game_main.py)
+3. **Main Menu System** (main.py)
    - Menu options: Modo Juego / Modo Afinador / Salir
    - Tablature selection interface
    - Game flow orchestration
@@ -110,7 +110,7 @@ Loaded tablature escala_ejemplo_track0_oct+0 ✓
 
 **✅ Game Execution Test**
 ```
-game_main.py execution: SUCCESS ✓
+main.py execution: SUCCESS ✓
   - pygame initialized
   - Menu system loaded
   - TablatureGameMode instantiated
@@ -123,7 +123,7 @@ game_main.py execution: SUCCESS ✓
 **1. Launch the Game**
 ```bash
 cd c:\Users\oscar\Documents\Code\ukelele_hero
-./venv/Scripts/python.exe game_main.py
+.venv/bin/python main.py
 ```
 
 **2. Main Menu Options**
@@ -151,7 +151,7 @@ cd c:\Users\oscar\Documents\Code\ukelele_hero
 ### Files Overview
 
 **Core Game Files:**
-- [game_main.py](game_main.py) - Entry point with menu system
+- [main.py](main.py) - Entry point with menu system
 - [src/game/tablature_mode.py](src/game/tablature_mode.py) - Game logic & rendering
 - [src/game/tuner_mode.py](src/game/tuner_mode.py) - Note detection mode
 

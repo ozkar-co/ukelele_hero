@@ -4,4 +4,6 @@ sounddevice>=0.4.5
 scipy>=1.10.0
 mido>=1.2.10
 pretty_midi>=0.2.9
-matplotlib>=3.6.0
+
+# Build de la distribución portable (make dist)
+pyinstaller>=6.0

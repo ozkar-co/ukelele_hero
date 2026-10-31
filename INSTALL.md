@@ -5,21 +5,18 @@
 ### 🐧 Ubuntu/Debian Linux
 
 ```bash
-# 1. Actualizar el sistema
-sudo apt update && sudo apt upgrade -y
-
-# 2. Instalar dependencias del sistema
-sudo apt install python3 python3-dev python3-pip -y
-sudo apt install python3-pygame python3-numpy python3-scipy python3-matplotlib -y
+# 1. Dependencia del sistema para audio (PortAudio)
 sudo apt install portaudio19-dev -y
-sudo apt install python3-mido -y
 
-# 3. Clonar el repositorio
+# 2. Clonar el repositorio
 git clone <repository-url>
 cd ukelele_hero
 
+# 3. Crear .venv e instalar desde wheelhouse/ (sin red si ya está poblado)
+make config
+
 # 4. Ejecutar el juego
-python3 main.py
+.venv/bin/python main.py
 ```
 
 ### 🎤 Configuración de Audio
@@ -162,7 +159,7 @@ Si tienes problemas:
 Para debug avanzado:
 ```bash
 # Ejecutar con información de debug de audio
-ALSA_DEBUG=1 python3 main.py
+ALSA_DEBUG=1 .venv/bin/python main.py
 
 # Ver dispositivos de audio detallados
 cat /proc/asound/cards

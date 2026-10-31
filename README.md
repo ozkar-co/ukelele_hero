@@ -81,45 +81,21 @@ El proyecto se desarrolla en **tres etapas progresivas**, cada una construyendo 
 ```
 ukelele_hero/
 ├── README.md
+├── Makefile                  # config, fetch, test, clean, dist
 ├── requirements.txt
-├── main.py
+├── wheelhouse/               # Wheels para instalar sin red
+├── main.py                   # Único punto de entrada
 ├── src/
-│   ├── __init__.py
-│   ├── audio/
-│   │   ├── __init__.py
-│   │   ├── microphone.py      # Captura de audio
-│   │   ├── frequency_analyzer.py  # Análisis FFT
-│   │   └── note_detector.py   # Detección de notas
-│   ├── game/
-│   │   ├── __init__.py
-│   │   ├── tuner_mode.py      # Etapa 1: Afinador
-│   │   ├── simon_mode.py      # Etapa 2: Simon
-│   │   ├── hero_mode.py       # Etapa 3: Juego completo
-│   │   └── ui/
-│   │       ├── __init__.py
-│   │       ├── screens.py
-│   │       └── components.py
-│   ├── music/
-│   │   ├── __init__.py
-│   │   ├── midi_parser.py     # Análisis de MIDI
-│   │   ├── tab_parser.py      # Parser de tablature
-│   │   └── note_mapping.py    # Mapeo de notas del ukulele
-│   └── utils/
-│       ├── __init__.py
-│       ├── config.py          # Configuración del juego
-│       └── helpers.py         # Funciones auxiliares
+│   ├── audio/                # Captura, FFT, detección de notas
+│   ├── game/                 # Modos de juego y UI
+│   ├── music/                # MIDI y tablaturas
+│   └── utils/                # Configuración y helpers
 ├── assets/
-│   ├── images/
-│   ├── sounds/
-│   └── fonts/
-├── songs/
-│   ├── midi/
-│   └── tabs/
+│   ├── midi/                 # Canciones MIDI
+│   └── tablatures/           # Tablaturas JSON
+├── tools/                    # Utilidades de MIDI/tablaturas
 └── tests/
-    ├── __init__.py
-    ├── test_audio.py
-    ├── test_game.py
-    └── test_music.py
+    └── test_audio.py
 ```
 
 ## Configuración del Ukulele
@@ -145,31 +121,37 @@ El juego está configurado para la afinación estándar del ukulele soprano:
 - Micrófono funcional
 - Altavoces o auriculares
 
-### Instalación Rápida (Ubuntu/Debian)
+### Instalación (offline first)
 ```bash
 # Clonar el repositorio
 git clone <repository-url>
 cd ukelele_hero
 
-# Instalar dependencias del sistema
-sudo apt update
-sudo apt install python3-pygame python3-numpy python3-scipy python3-matplotlib -y
-sudo apt install portaudio19-dev python3-mido -y
+# Crear .venv e instalar desde wheelhouse/ (sin red si ya está poblado)
+make config
+
+# Dependencia del sistema para sounddevice (PortAudio)
+sudo apt install portaudio19-dev -y
 
 # Ejecutar el juego
-python3 main.py
+.venv/bin/python main.py
 ```
 
-### Instalación Manual
+`make fetch` actualiza `wheelhouse/` con red o verifica el existente sin red.
+`make config` es obligatorio tras clonar el proyecto.
+
+### Distribución portable
 ```bash
-git clone <repository-url>
-cd ukelele_hero
-pip install -r requirements.txt
-python3 main.py
+make dist
+# Resultado: dist/ukelele_hero/  ->  ./dist/ukelele_hero/ukelele_hero
 ```
+
+La carpeta `dist/ukelele_hero/` se copia a otra máquina Linux con la misma
+arquitectura. No hace falta Python ni las dependencias, pero PortAudio debe
+estar instalado en el sistema destino. `assets/` queda junto al ejecutable.
 
 ### Uso Actual - Etapa 1: Detector de Notas
-1. Ejecuta `python3 main.py`
+1. Ejecuta `.venv/bin/python main.py`
 2. Selecciona "1. Detector de Notas (Etapa 1)" en el menú
 3. Toca una cuerda del ukulele cerca del micrófono
 4. Analiza las métricas de detección para calibración:
